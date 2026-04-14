@@ -1,35 +1,40 @@
 {
-	"name": "vscode-coding-tracker",
-	"displayName": "Coding Tracker",
-	"description": "A coding activities tracker(time, file, type)",
-	"version": "0.8.0",
+	"name": "vscode-coding-tracker-fork",
+	"displayName": "Slashcoded Coding tracker",
+	"description": "Integrates VS Code with the SlashCoded desktop app (lundholm.io/project/slashcoded) to track coding time, file edits, terminal sessions, AI chats, AFK, and sync status via useful commands like show report, start/stop local server, flush uploads, and set the upload token.",
+	"version": "0.10.4",
+	"type": "commonjs",
 	"license": "GPL-3.0",
-	"publisher": "hangxingliu",
-	"author": "hangxingliu",
-	"icon": "images/icon.png",
+	"publisher": "lundholm",
+	"author": "pakanatahu",
+	"icon": "images/slashcoded.png",
 	"engines": {
-		"vscode": "^1.1.0"
+		"vscode": "^1.1.0",
+		"node": ">=22.0.0"
 	},
 	"categories": [
 		"Other"
 	],
 	"activationEvents": [
-		"*"
+		"onStartupFinished"
 	],
 	"extensionKind": [
-		"ui", 
+		"ui",
 		"workspace"
 	],
-	"main": "./extension",
+	"main": "./dist/extension.js",
 	"dependencies": {
-		"axios": "^0.24.0",
+		"axios": "^1.7.7",
 		"tree-kill": "^1.2.2",
 		"uuid": "^8.3.2",
 		"vscode-coding-tracker-server": "^0.6.0"
 	},
 	"devDependencies": {
-		"@types/node": "^14",
-		"@types/vscode": "*"
+		"@types/node": "^22",
+		"@types/vscode": "*",
+		"typescript": "^5.8.3",
+		"@vscode/vsce": "^2.22.0",
+		"esbuild": "^0.25.10"
 	},
 	"optionalDependencies": {
 		"@typescript-eslint/eslint-plugin": "^5.4.0",
@@ -41,15 +46,16 @@
 			"type": "object",
 			"title": "Coding Tracker configuration",
 			"properties": {
+				"codingTracker.connectionMode": {
+					"type": "string",
+					"enum": ["desktop", "cloud"],
+					"default": "desktop",
+					"description": "Connection mode: 'desktop' sends events to the SlashCoded desktop Local API on localhost; 'cloud' sends them to the legacy cloud ingest service."
+				},
 				"codingTracker.uploadToken": {
 					"type": "string",
 					"default": "",
 					"description": "%cfg.uploadToken%"
-				},
-				"codingTracker.serverURL": {
-					"type": "string",
-					"default": "http://127.0.0.1:10345",
-					"description": "%cfg.serverURL%"
 				},
 				"codingTracker.computerId": {
 					"type": "string",
@@ -83,6 +89,48 @@
 						false
 					],
 					"description": "%cfg.proxy%"
+				},
+				"codingTracker.shouldTrackTerminal": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable or disable tracking of terminal activity."
+				},
+				"codingTracker.shouldTrackAIChat": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable or disable tracking of AI chat (Copilot Chat, AIChat, etc.) activity."
+				},
+				"codingTracker.functionKey": {
+					"type": "string",
+					"default": "",
+					"description": "Azure Function key for authenticated upload endpoints (if required)."
+				},
+				"codingTracker.overrideOrigin": {
+					"type": "string",
+					"default": "",
+					"description": "Override Origin header (defaults to vscode-extension://<publisher>.<name>)."
+				},
+				"codingTracker.afkEnabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable AFK detection and pause/resume tracking automatically."
+				},
+				"codingTracker.afkTimeoutMinutes": {
+					"type": "number",
+					"default": 15,
+					"minimum": 1,
+					"maximum": 180,
+					"description": "Minutes of inactivity before entering AFK mode."
+				},
+				"codingTracker.uploadTimeoutMs": {
+					"type": "number",
+					"default": 15000,
+					"description": "Timeout in milliseconds for each upload request (default 15000)."
+				},
+				"codingTracker.desktopDiscoveryTimeoutMs": {
+					"type": "number",
+					"default": 500,
+					"description": "Timeout in milliseconds for desktop app discovery handshake (default 500)."
 				}
 			}
 		},
@@ -101,18 +149,70 @@
 				"command": "codingTracker.stopLocalServer",
 				"title": "%cmd.stopLocalServer%",
 				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.githubAuth",
+				"title": "CodingTracker: GitHub Auth / Refresh Token",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.flushUploads",
+				"title": "CodingTracker: Flush Upload Queue",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.showSyncStatus",
+				"title": "CodingTracker: Show Sync Status",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.rediscoverDesktop",
+				"title": "CodingTracker: Re-discover Desktop App",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.setUploadToken",
+				"title": "CodingTracker: Set Upload Token",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.afkEnable",
+				"title": "CodingTracker: AFK Enable",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.afkDisable",
+				"title": "CodingTracker: AFK Disable",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.afkToggle",
+				"title": "CodingTracker: AFK Toggle",
+				"category": "CodingTracker"
+			},
+			{
+				"command": "codingTracker.showOutput",
+				"title": "CodingTracker: Show Output Channel",
+				"category": "CodingTracker"
 			}
 		]
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/hangxingliu/vscode-coding-tracker"
+		"url": "https://github.com/pakanatahu/vscode-coding-tracker"
 	},
+	"bugs": {
+		"url": "https://github.com/pakanatahu/vscode-coding-tracker/issues"
+	},
+	"homepage": "https://github.com/pakanatahu/vscode-coding-tracker#readme",
 	"scripts": {
 		"install-vscode-dts": "node ./lib/vscode.d.ts/FETCH.js",
 		"start": "./node_modules/.bin/coding-tracker-server",
 		"test": "npm run setup-i18n",
-		"setup-i18n": "node ./utils/setup-i18n.js"
+		"test:node": "node --test test/*.test.js",
+		"setup-i18n": "node ./utils/setup-i18n.js",
+		"bundle": "node ./scripts/esbuild.bundle.mjs",
+		"package": "npm run bundle && npx @vscode/vsce package"
 	},
 	"keywords": [
 		"vscode",

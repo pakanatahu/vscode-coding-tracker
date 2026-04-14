@@ -12,8 +12,9 @@ type UploadObject = {
 	version: '4.0';
 	token: string;
 	type: string;
-	time: string;
-	long: number;
+	typeCode?: number; // numeric parity: open=1, code=2, terminal=3, chat=4
+	time: number; // timestamp ms
+	long: number; // duration ms
 	/**
 	 * File language
 	 */
@@ -38,21 +39,17 @@ type UploadObject = {
 	vcs_repo: string;
 	vcs_branch: string;
 
-	/**
-	 * Line counts
-	 */
+	/** Line counts */
 	line: number;
-	/**
-	 * Character counts
-	 */
+	/** Character counts */
 	char: number;
-	/**
-	 * Reserved field 1
-	 */
+	/** Reserved field 1 */
 	r1: string;
-	/**
-	 * Reserved field 2
-	 */
+	/** Reserved field 2 */
 	r2: string;
-}
+	/** Terminal command (optional) */
+	command?: string;
+	/** Terminal working directory (optional) */
+	cwd?: string;
+};
 

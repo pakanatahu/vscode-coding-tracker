@@ -1,0 +1,159 @@
+{
+  "configuration": {
+    "type": "object",
+    "title": "Coding Tracker configuration",
+    "properties": {
+      "codingTracker.connectionMode": {
+        "type": "string",
+        "enum": [
+          "desktop",
+          "cloud"
+        ],
+        "default": "desktop",
+        "description": "Connection mode: 'desktop' sends events to the SlashCoded desktop Local API on localhost; 'cloud' sends them to the legacy cloud ingest service."
+      },
+      "codingTracker.uploadToken": {
+        "type": "string",
+        "default": "",
+        "description": "%cfg.uploadToken%"
+      },
+      "codingTracker.computerId": {
+        "type": "string",
+        "default": "",
+        "description": "%cfg.computerId%"
+      },
+      "codingTracker.localServerMode": {
+        "type": "boolean",
+        "default": true,
+        "description": "%cfg.localServerMode%"
+      },
+      "codingTracker.moreThinkingTime": {
+        "type": "number",
+        "default": 0,
+        "description": "%cfg.moreThinkingTime%"
+      },
+      "codingTracker.showStatus": {
+        "type": "boolean",
+        "default": true,
+        "description": "%cfg.showStatus%"
+      },
+      "codingTracker.proxy": {
+        "type": [
+          "string",
+          "boolean"
+        ],
+        "default": "auto",
+        "enum": [
+          "auto",
+          "no-proxy",
+          false
+        ],
+        "description": "%cfg.proxy%"
+      },
+      "codingTracker.shouldTrackTerminal": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable or disable tracking of terminal activity."
+      },
+      "codingTracker.shouldTrackAIChat": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable or disable tracking of AI chat (Copilot Chat, AIChat, etc.) activity."
+      },
+      "codingTracker.functionKey": {
+        "type": "string",
+        "default": "",
+        "description": "Azure Function key for authenticated upload endpoints (if required)."
+      },
+      "codingTracker.overrideOrigin": {
+        "type": "string",
+        "default": "",
+        "description": "Override Origin header (defaults to vscode-extension://<publisher>.<name>)."
+      },
+      "codingTracker.afkEnabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable AFK detection and pause/resume tracking automatically."
+      },
+      "codingTracker.afkTimeoutMinutes": {
+        "type": "number",
+        "default": 15,
+        "minimum": 1,
+        "maximum": 180,
+        "description": "Minutes of inactivity before entering AFK mode."
+      },
+      "codingTracker.uploadTimeoutMs": {
+        "type": "number",
+        "default": 15000,
+        "description": "Timeout in milliseconds for each upload request (default 15000)."
+      },
+      "codingTracker.desktopDiscoveryTimeoutMs": {
+        "type": "number",
+        "default": 500,
+        "description": "Timeout in milliseconds for desktop app discovery handshake (default 500)."
+      }
+    }
+  },
+  "commands": [
+    {
+      "command": "codingTracker.showReport",
+      "title": "%cmd.showReport%",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.startLocalServer",
+      "title": "%cmd.startLocalServer%",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.stopLocalServer",
+      "title": "%cmd.stopLocalServer%",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.githubAuth",
+      "title": "CodingTracker: GitHub Auth / Refresh Token",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.flushUploads",
+      "title": "CodingTracker: Flush Upload Queue",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.showSyncStatus",
+      "title": "CodingTracker: Show Sync Status",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.rediscoverDesktop",
+      "title": "CodingTracker: Re-discover Desktop App",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.setUploadToken",
+      "title": "CodingTracker: Set Upload Token",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.afkEnable",
+      "title": "CodingTracker: AFK Enable",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.afkDisable",
+      "title": "CodingTracker: AFK Disable",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.afkToggle",
+      "title": "CodingTracker: AFK Toggle",
+      "category": "CodingTracker"
+    },
+    {
+      "command": "codingTracker.showOutput",
+      "title": "CodingTracker: Show Output Channel",
+      "category": "CodingTracker"
+    }
+  ]
+}

@@ -1,8 +1,11 @@
 {
-	"codingTracker.serverURL": "http://localhost:10345/",
-	"codingTracker.uploadToken": "123456",
-	"codingTracker.computerId": "ubuntuLaptop",
-
+	"codingTracker.serverURL": "https://codingtracker-ingest.azurewebsites.net/",
+	"codingTracker.uploadToken": "",
+	"codingTracker.computerId": "Davido-Laptop",
+	"codingTracker.shouldTrackTerminal": true,
+	"codingTracker.shouldTrackAIChat": true,
+	"codingTracker.afkEnabled": true,
+	"codingTracker.afkTimeoutMinutes": 1,
 	"files.exclude": {
 		"**/.git": true,
 		"**/.svn": true,

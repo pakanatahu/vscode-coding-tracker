@@ -6,6 +6,8 @@
 # ignore *.vsix (extension archive file)
 *.vsix
 
+#
+.vscode/settings.json
 # ignore generated i18n files
 package.nls.json
 package.nls.*.json
