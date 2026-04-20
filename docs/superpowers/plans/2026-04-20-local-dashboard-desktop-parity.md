@@ -586,7 +586,7 @@ Add concise notes to `README.md` and `CHANGELOG.md`:
 - The 24h chart uses the same Chart.js visual grammar as the shared Slashcoded area chart.
 ```
 
-- [ ] **Step 5: Commit the verification and docs changes**
+- [x] **Step 5: Commit the verification and docs changes**
 
 If docs are the only files changed by this task:
 
