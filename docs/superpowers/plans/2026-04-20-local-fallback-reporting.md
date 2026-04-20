@@ -519,7 +519,7 @@ Manual verification:
 6. Confirm the CTA link points to `https://lundholm.io/project/slashcoded`.
 7. Start Slashcoded Desktop (if available), trigger `CodingTracker: Show Report` again, and confirm the Desktop-hosted report still wins.
 
-- [ ] **Step 4: Commit the final verification-only follow-up if the build changed generated artifacts**
+- [x] **Step 4: Commit the final verification-only follow-up if the build changed generated artifacts**
 
 If bundling regenerated tracked artifacts owned by this work:
 
