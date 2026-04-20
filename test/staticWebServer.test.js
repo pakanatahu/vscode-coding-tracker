@@ -66,6 +66,25 @@ test('report route serves the desktop-style fallback dashboard shell', async () 
     }
 });
 
+test('report route serves the chart footer breakdown toolbar', async () => {
+    const staticDir = path.join(__dirname, '..', 'server-app');
+    const server = start({
+        staticDir,
+        port: 0,
+        debugLog: () => {},
+        getReportSummary: async () => ({ totals: {}, chart24h: {}, byActivity: [] })
+    });
+
+    try {
+        await waitForServer(server);
+        const html = await httpGetText(`${server.url}/report/`);
+        assert.match(html, /Break down by/);
+        assert.match(html, /toolbar-chip/);
+    } finally {
+        server.close();
+    }
+});
+
 test('static server serves the chart.js vendor asset', async () => {
     const staticDir = path.join(__dirname, '..', 'server-app');
     const server = start({

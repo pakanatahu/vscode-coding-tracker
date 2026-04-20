@@ -29,21 +29,19 @@ function render24HourChart(chart) {
         destroy24HourChart();
         root.innerHTML = `
             <div class="chart-header">
-                <h2>VS Code activity breakdown</h2>
-                <p class="chart-subtitle">Visible totals</p>
+                <h2>Last 24 hours</h2>
             </div>
-            <p class="empty-state">No local activity recorded for today yet.</p>
+            <div class="chart-canvas-wrap chart-empty-wrap">
+                <p class="empty-state">No local activity recorded for today yet.</p>
+            </div>
+            ${renderBreakdownToolbar(chart)}
         `;
         return;
     }
 
     root.innerHTML = `
         <div class="chart-header">
-            <h2>${escapeHtml(chart.title || 'VS Code activity breakdown')}</h2>
-            <p class="chart-subtitle">Visible totals</p>
-        </div>
-        <div class="legend-pills">
-            ${activeSeries.map(renderLegendPill).join('')}
+            <h2>${escapeHtml(chart.title || 'Last 24 hours')}</h2>
         </div>
         <div class="chart-frame">
             <div class="chart-now-badge">${escapeHtml(chart.currentTimeLabel || '')}</div>
@@ -53,6 +51,7 @@ function render24HourChart(chart) {
             </div>
             <div class="chart-corner-badge">H</div>
         </div>
+        ${renderBreakdownToolbar(chart)}
     `;
 
     render24HourChartCanvas(root, chart, labels, activeSeries);
@@ -83,6 +82,21 @@ function renderLegendPill(item) {
             <span class="legend-dot" style="background:${escapeHtml(item.color || '#ffffff')}"></span>
             <span class="legend-label">${escapeHtml(item.label || 'Unknown')}</span>
             <span class="legend-total">${escapeHtml(formatDuration(item.totalMs || 0))}</span>
+        </div>
+    `;
+}
+
+function renderBreakdownToolbar(chart) {
+    const label = chart.breakdownLabel || 'Break down by';
+    const options = Array.isArray(chart.breakdownOptions) && chart.breakdownOptions.length
+        ? chart.breakdownOptions
+        : ['Activities'];
+    const active = chart.activeBreakdown || options[0];
+
+    return `
+        <div class="breakdown-toolbar" role="group" aria-label="${escapeHtml(label)}">
+            <span class="muted small">${escapeHtml(label)}</span>
+            ${options.map(option => `<button type="button" class="toolbar-chip${option === active ? ' active' : ''}">${escapeHtml(option)}</button>`).join('')}
         </div>
     `;
 }

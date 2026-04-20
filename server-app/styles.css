@@ -154,38 +154,9 @@ body {
     text-transform: uppercase;
 }
 
-.legend-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 12px 0 16px;
-}
-
-.legend-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid hsl(var(--border) / 0.85);
-    background: hsl(var(--muted) / 0.92);
-}
-
-.legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    flex: 0 0 auto;
-}
-
-.legend-label {
-    font-size: 0.88rem;
-    font-weight: 600;
-}
-
-.legend-total {
+.muted.small {
     color: hsl(var(--muted-foreground));
-    font-size: 0.84rem;
+    font-size: 0.82rem;
 }
 
 .chart-frame {
@@ -195,6 +166,13 @@ body {
 .chart-canvas-wrap {
     position: relative;
     height: 320px;
+}
+
+.chart-empty-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
 }
 
 .chart-now-badge {
@@ -232,6 +210,33 @@ body {
     background: hsl(var(--card));
     color: hsl(var(--muted-foreground));
     font-size: 1.2rem;
+}
+
+.breakdown-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 8px;
+    border-top: 1px solid hsl(var(--border) / 0.7);
+}
+
+.toolbar-chip {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 0.85);
+    background: hsl(var(--card));
+    color: hsl(var(--muted-foreground));
+    font: inherit;
+    cursor: pointer;
+}
+
+.toolbar-chip.active {
+    background: hsl(var(--foreground));
+    color: hsl(var(--card));
+    border-color: hsl(var(--foreground));
 }
 
 .secondary-grid {
