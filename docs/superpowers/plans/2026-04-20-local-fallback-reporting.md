@@ -468,7 +468,7 @@ Expected: PASS
 Run: `npm run test:node`
 Expected: PASS with the new tests included alongside the existing suite
 
-- [ ] **Step 5: Commit the task-specific changes**
+- [x] **Step 5: Commit the task-specific changes**
 
 If the task only changed files owned by this task:
 
@@ -496,17 +496,19 @@ git commit -m "docs: describe fallback local reporting"
 - Verify only: `server-app/index.html`
 - Verify only: `server-app/app.js`
 
-- [ ] **Step 1: Run the full node test suite again**
+- [x] **Step 1: Run the full node test suite again**
 
 Run: `npm run test:node`
 Expected: PASS
 
-- [ ] **Step 2: Build the extension bundle**
+- [x] **Step 2: Build the extension bundle**
 
 Run: `npm run bundle`
 Expected: PASS and regenerated `dist/extension.js` without bundling errors
 
 - [ ] **Step 3: Perform a manual fallback smoke test in VS Code**
+
+Manual status: Not completed in this shell session. Requires launching the VS Code extension host and validating the Desktop-vs-fallback report flow interactively.
 
 Manual verification:
 1. Launch the extension without Slashcoded Desktop running.

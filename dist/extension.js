@@ -15201,11 +15201,15 @@ var require_StaticWebServer = __commonJS({
     var http = require("http");
     var fs = require("fs");
     var path = require("path");
-    function start(staticDir, port, debugLog) {
-      const server = http.createServer((req, res) => {
+    function start(options) {
+      const staticDir = options.staticDir;
+      const port = options.port;
+      const debugLog = options.debugLog;
+      const getReportSummary = typeof options.getReportSummary === "function" ? options.getReportSummary : async () => ({ totals: { totalMs: 0, eventCount: 0, rangeStart: null, rangeEnd: null }, byActivity: [], byRepo: [], byBranch: [], byExtension: [] });
+      const server = http.createServer(async (req, res) => {
         try {
-          const url2 = req.url || "/";
-          if (url2.startsWith("/ajax/kill")) {
+          const url = req.url || "/";
+          if (url.startsWith("/ajax/kill")) {
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ success: true }));
             setTimeout(() => {
@@ -15217,12 +15221,18 @@ var require_StaticWebServer = __commonJS({
             }, 50);
             return;
           }
-          if (url2 === "/" || url2 === "/welcome" || url2 === "/welcome/") {
+          if (url === "/" || url === "/welcome" || url === "/welcome/") {
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ version: "builtin-static", localServerMode: true }));
             return;
           }
-          const p = decodeURIComponent(url2.split("?")[0]);
+          const p = decodeURIComponent(url.split("?")[0]);
+          if (p === "/api/report/summary") {
+            const summary = await getReportSummary();
+            res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+            res.end(JSON.stringify(summary));
+            return;
+          }
           if (p === "/report" || p === "/report/") {
             const file = path.join(staticDir, "index.html");
             return streamFile(file, res);
@@ -15248,14 +15258,17 @@ var require_StaticWebServer = __commonJS({
         }
       });
       server.listen(port, "127.0.0.1");
-      const url = `http://127.0.0.1:${port}`;
       try {
-        debugLog(`[StaticWebServer] listening at ${url}, dir=${staticDir}`);
+        debugLog(`[StaticWebServer] listening at http://127.0.0.1:${port}, dir=${staticDir}`);
       } catch (err) {
         void err;
       }
       return {
-        url,
+        get url() {
+          const address = server.address();
+          const boundPort = address && typeof address === "object" ? address.port : port;
+          return `http://127.0.0.1:${boundPort}`;
+        },
         close: () => {
           try {
             server.close();
@@ -15269,7 +15282,12 @@ var require_StaticWebServer = __commonJS({
           const ext = path.extname(file).toLowerCase();
           const type = contentType(ext);
           res.writeHead(200, { "Content-Type": type });
-          fs.createReadStream(file).pipe(res);
+          const stream = fs.createReadStream(file);
+          stream.on("error", () => {
+            if (!res.headersSent) res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+            res.end("Not Found");
+          });
+          stream.pipe(res);
         } catch (e) {
           res.statusCode = 404;
           res.end("Not Found");
@@ -15304,6 +15322,116 @@ var require_StaticWebServer = __commonJS({
       }
     }
     module2.exports = { start };
+  }
+});
+
+// lib/localReport/historyStore.js
+var require_historyStore = __commonJS({
+  "lib/localReport/historyStore.js"(exports2, module2) {
+    var fs = require("fs");
+    var path = require("path");
+    function createHistoryStore(options) {
+      const storagePath = options && options.storagePath ? options.storagePath : "";
+      const historyDir = path.join(storagePath, "history");
+      const historyFilePath = path.join(historyDir, "activity.jsonl");
+      async function appendMany(events) {
+        if (!Array.isArray(events) || events.length === 0) return;
+        fs.mkdirSync(historyDir, { recursive: true });
+        const lines = events.filter((event) => event && typeof event === "object").map((event) => JSON.stringify(event)).join("\n");
+        if (!lines) return;
+        await fs.promises.appendFile(historyFilePath, `${lines}
+`, "utf8");
+      }
+      async function readAll() {
+        if (!fs.existsSync(historyFilePath)) return [];
+        return fs.readFileSync(historyFilePath, "utf8").split("\n").filter(Boolean).flatMap((line) => {
+          try {
+            return [JSON.parse(line)];
+          } catch (_) {
+            return [];
+          }
+        });
+      }
+      async function readReportEvents() {
+        const records = await readAll();
+        return records.filter((record) => Number(record.long) > 0 && Number(record.time) > 0);
+      }
+      return {
+        appendMany,
+        readAll,
+        readReportEvents,
+        historyFilePath
+      };
+    }
+    module2.exports = {
+      createHistoryStore
+    };
+  }
+});
+
+// lib/localReport/reportAggregator.js
+var require_reportAggregator = __commonJS({
+  "lib/localReport/reportAggregator.js"(exports2, module2) {
+    var path = require("path");
+    function buildReportSummary(events) {
+      const safeEvents = Array.isArray(events) ? events.filter(Boolean) : [];
+      const filteredEvents = safeEvents.filter((event) => Number(event.long) > 0);
+      const datedEvents = filteredEvents.filter((event) => Number(event.time) > 0);
+      const times = datedEvents.map((event) => Number(event.time));
+      return {
+        totals: {
+          totalMs: sum(filteredEvents, (event) => Number(event.long) || 0),
+          eventCount: filteredEvents.length,
+          rangeStart: times.length ? Math.min(...times) : null,
+          rangeEnd: times.length ? Math.max(...times.map((time, index) => time + (Number(datedEvents[index].long) || 0))) : null
+        },
+        byActivity: toGroups(filteredEvents, (event) => normalizeActivity(event.type)),
+        byRepo: toGroups(filteredEvents, (event) => normalizeRepo(event.vcs_repo)),
+        byBranch: toGroups(filteredEvents, (event) => normalizeBranch(event.vcs_branch)),
+        byExtension: toGroups(
+          filteredEvents.filter((event) => shouldIncludeExtension(event.file)),
+          (event) => extractExtension(event.file)
+        )
+      };
+    }
+    function sum(items, selector) {
+      return items.reduce((total, item) => total + (Number(selector(item)) || 0), 0);
+    }
+    function toGroups(events, keySelector) {
+      const totals = /* @__PURE__ */ new Map();
+      for (const event of events) {
+        const key = keySelector(event);
+        const totalMs = Number(event.long) || 0;
+        totals.set(key, (totals.get(key) || 0) + totalMs);
+      }
+      return Array.from(totals.entries()).map(([key, totalMs]) => ({ key, totalMs })).sort((left, right) => {
+        if (right.totalMs !== left.totalMs) return right.totalMs - left.totalMs;
+        return left.key.localeCompare(right.key);
+      });
+    }
+    function normalizeActivity(value) {
+      return normalizeLabel(value, "unknown");
+    }
+    function normalizeRepo(value) {
+      return normalizeLabel(value, "No repository");
+    }
+    function normalizeBranch(value) {
+      return normalizeLabel(value, "No branch");
+    }
+    function normalizeLabel(value, fallback) {
+      const text = typeof value === "string" ? value.trim() : "";
+      return text ? text : fallback;
+    }
+    function shouldIncludeExtension(file) {
+      return typeof file === "string" && file.trim().length > 0;
+    }
+    function extractExtension(file) {
+      const ext = path.extname(typeof file === "string" ? file.trim() : "");
+      return ext || "No extension";
+    }
+    module2.exports = {
+      buildReportSummary
+    };
   }
 });
 
@@ -15923,6 +16051,8 @@ var require_LocalServer = __commonJS({
     var axios = axiosLib;
     var path = require("path");
     var staticServer = require_StaticWebServer();
+    var { createHistoryStore } = require_historyStore();
+    var { buildReportSummary } = require_reportAggregator();
     var log = require_OutputChannelLog();
     var statusBar = require_StatusBarManager();
     var ext = (
@@ -15938,8 +16068,10 @@ var require_LocalServer = __commonJS({
     var serverChildProcess = null;
     var isStopping = false;
     var builtinServer = null;
+    var storagePath = "";
     function init(extensionContext) {
       var { subscriptions } = extensionContext;
+      storagePath = extensionContext && extensionContext.globalStorageUri ? extensionContext.globalStorageUri.fsPath : "";
       subscriptions.push(vscode.commands.registerCommand("codingTracker.showReport", showReport));
       subscriptions.push(vscode.commands.registerCommand("codingTracker.startLocalServer", () => startLocalServer()));
       subscriptions.push(vscode.commands.registerCommand("codingTracker.stopLocalServer", () => stopLocalServer()));
@@ -16002,8 +16134,28 @@ var require_LocalServer = __commonJS({
       isStopping = false;
       const staticDir = path.join(__dirname, "..", "server-app");
       if (fs.existsSync(staticDir) && fs.statSync(staticDir).isDirectory()) {
+        if (builtinServer) {
+          isLocalServerRunningInThisContext = true;
+          statusBar.localServer.turnOn();
+          if (!silent) vscode.window.showInformationMessage(`CodingTracker: built-in local server started!`);
+          return;
+        }
         const port = Number(_getPortInfoFromURL(userConfig.url));
-        builtinServer = staticServer.start(staticDir, port, (m) => log.debug(m));
+        builtinServer = staticServer.start({
+          staticDir,
+          port,
+          debugLog: (m) => log.debug(m),
+          getReportSummary: async () => {
+            const historyStore = createHistoryStore({ storagePath });
+            const events = await historyStore.readReportEvents();
+            return Object.assign(buildReportSummary(events), {
+              desktop: {
+                detected: false,
+                downloadUrl: "https://lundholm.io/project/slashcoded"
+              }
+            });
+          }
+        });
         isLocalServerRunningInThisContext = true;
         statusBar.localServer.turnOn();
         vscode.window.showInformationMessage(`CodingTracker: built-in local server started!`);
@@ -16083,6 +16235,17 @@ var require_LocalServer = __commonJS({
     }
     function stopLocalServer() {
       isStopping = true;
+      if (builtinServer) {
+        try {
+          builtinServer.close();
+        } catch (_) {
+        }
+        builtinServer = null;
+        isLocalServerRunningInThisContext = false;
+        statusBar.localServer.turnOff();
+        vscode.window.showInformationMessage(`CodingTracker: local server stopped!`);
+        return;
+      }
       log.debug(`[Kill]: try to kill local server...`);
       axios.get(_getKillURL(), { params: { token: userConfig.token } }).then(
         /** @param {import('axios').AxiosResponse<any>} res */
@@ -16125,8 +16288,28 @@ var require_LocalServer = __commonJS({
         require_tree_kill()(serverChildProcess.pid);
       serverChildProcess = null;
     }
-    function showReport() {
-      exec(_getOpenReportCommand(), (err) => err && _showError(`Execute open report command error!`, err));
+    async function showReport() {
+      try {
+        const uploader = require_Uploader();
+        const status = uploader && uploader.getStatusSnapshot ? uploader.getStatusSnapshot() : null;
+        const desktopUrl = getDesktopReportURL(status);
+        if (desktopUrl) {
+          await vscode.env.openExternal(vscode.Uri.parse(desktopUrl));
+          return;
+        }
+        startLocalServer(true);
+        if (builtinServer && builtinServer.url) {
+          await vscode.env.openExternal(vscode.Uri.parse(`${builtinServer.url}/report/`));
+          return;
+        }
+        exec(_getOpenReportCommand(), (err) => err && _showError(`Execute open report command error!`, err));
+      } catch (err) {
+        _showError(
+          `Execute open report command error!`,
+          /** @type {{stack?:any}} */
+          err || { stack: "Unknown error" }
+        );
+      }
     }
     function _checkConnection(then) {
       axios.get(_getWelcomeURL()).then(
@@ -16158,6 +16341,16 @@ var require_LocalServer = __commonJS({
     }
     function _getReportURL() {
       return `${userConfig.url}/report/` + (userConfig.token ? `?token=${userConfig.token}` : ``);
+    }
+    function getDesktopReportURL(status) {
+      try {
+        const discovery = status && status.discovery ? status.discovery : null;
+        const base = discovery && (discovery.publicBaseUrl || discovery.apiBaseUrl);
+        if (!base) return "";
+        return `${String(base).replace(/\/api\/?$/i, "").replace(/\/$/, "")}/report/`;
+      } catch (_) {
+        return "";
+      }
     }
     function _getWelcomeURL() {
       return `${userConfig.url}/`;
@@ -16579,6 +16772,7 @@ var require_Uploader = __commonJS({
     var statusBar = require_StatusBarManager();
     var localServer = require_LocalServer();
     var log = require_Log();
+    var { createHistoryStore } = require_historyStore();
     var { isDebugMode } = require_Constants();
     var {
       createDefaultTrackingConfig,
@@ -16657,6 +16851,7 @@ var require_Uploader = __commonJS({
     var enforcementMode = null;
     var lastEnforcementCheckAt = 0;
     var deadLetterFilePath = "";
+    var historyStore = null;
     function expandPayloadsForQueue(payload, config) {
       if (!payload)
         return [payload];
@@ -16768,6 +16963,7 @@ var require_Uploader = __commonJS({
             fs.mkdirSync(storagePath, { recursive: true });
             queueFilePath = path.join(storagePath, "queue.json");
             deadLetterFilePath = path.join(storagePath, "dead-letter.jsonl");
+            historyStore = createHistoryStore({ storagePath });
             loadQueueFromDisk();
           } catch (e) {
             log.debug("Failed to prepare queue storage", e);
@@ -16867,6 +17063,15 @@ var require_Uploader = __commonJS({
         const queuePayloads = expandPayloadsForQueue(payload, trackingSnapshot);
         if (queuePayloads.length > 1) {
           log.debug(`uploader: split payload into ${queuePayloads.length} shared-timing chunks (${payload.long}ms total)`);
+        }
+        const persistedPayloads = queuePayloads.map((queuedPayload) => normalizePayload(queuedPayload));
+        if (historyStore) {
+          historyStore.appendMany(persistedPayloads).catch((error) => {
+            try {
+              log.debug("Failed to persist local history", error);
+            } catch (_) {
+            }
+          });
         }
         for (const queuedPayload of queuePayloads) {
           log.debug(`new upload object: ${queuedPayload.type};${queuedPayload.time};${queuedPayload.long};${queuedPayload.file}`);
