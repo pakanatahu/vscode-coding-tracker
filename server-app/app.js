@@ -44,12 +44,9 @@ function render24HourChart(chart) {
             <h2>${escapeHtml(chart.title || 'Last 24 hours')}</h2>
         </div>
         <div class="chart-frame">
-            <div class="chart-now-badge">${escapeHtml(chart.currentTimeLabel || '')}</div>
-            <div class="chart-y-axis-title">Hours</div>
             <div class="chart-canvas-wrap">
-                <canvas id="chart24h-canvas" aria-label="VS Code activity breakdown 24 hour chart" role="img"></canvas>
+                <canvas id="chart24h-canvas" aria-label="Last 24 hours activity chart" role="img"></canvas>
             </div>
-            <div class="chart-corner-badge">H</div>
         </div>
         ${renderBreakdownToolbar(chart)}
     `;
@@ -121,7 +118,6 @@ function render24HourChartCanvas(root, chart, labels, series) {
     const options = createAreaChartOptions(labels, maxMinutes, chart.currentTimeLabel || '');
     const plugins = [
         createVerticalLinePlugin(),
-        createNowLinePlugin(chart.currentTimeLabel || ''),
         createTopStackOutlinePlugin()
     ];
 
@@ -216,9 +212,10 @@ function createAreaChartOptions(labels, maxMinutes, currentTimeLabel) {
                     color: readCssVar('--grid-line', 'rgba(255,255,255,0.06)')
                 },
                 ticks: {
-                    autoSkip: false,
-                    maxRotation: 55,
-                    minRotation: 55,
+                    autoSkip: true,
+                    maxTicksLimit: 8,
+                    maxRotation: 0,
+                    minRotation: 0,
                     color: cssHsl('--muted-foreground'),
                     callback: (_, index) => labels[index] || ''
                 }
@@ -234,7 +231,7 @@ function createAreaChartOptions(labels, maxMinutes, currentTimeLabel) {
                 },
                 title: {
                     display: true,
-                    text: 'Hours',
+                    text: 'Minutes',
                     color: cssHsl('--muted-foreground')
                 },
                 ticks: {
@@ -264,39 +261,6 @@ function createVerticalLinePlugin() {
             ctx.lineWidth = 1;
             ctx.strokeStyle = 'rgba(255,255,255,0.24)';
             ctx.stroke();
-            ctx.restore();
-        }
-    };
-}
-
-function createNowLinePlugin(currentTimeLabel) {
-    return {
-        id: 'nowLine',
-        afterDraw(chart) {
-            const { right, top, bottom, left } = chart.chartArea || {};
-            if (typeof right !== 'number') return;
-            const ctx = chart.ctx;
-            const label = currentTimeLabel || '';
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(right, top);
-            ctx.lineTo(right, bottom);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'rgba(255,255,255,0.30)';
-            ctx.stroke();
-
-            if (label) {
-                ctx.font = `10px ${uiFontStack()}`;
-                const width = ctx.measureText(label).width;
-                const x = Math.min(Math.max(right - (width / 2), left + 2), right - width - 2);
-                const y = Math.max(top - 10, 10);
-                ctx.textBaseline = 'middle';
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = 'rgba(0,0,0,0.55)';
-                ctx.fillStyle = 'rgba(255,255,255,0.86)';
-                ctx.strokeText(label, x, y);
-                ctx.fillText(label, x, y);
-            }
             ctx.restore();
         }
     };
