@@ -68,7 +68,7 @@ body {
 }
 
 .panel {
-    padding: 16px 18px;
+    padding: 14px 16px;
     border-radius: 20px;
     border: 1px solid hsl(var(--border) / 0.9);
     background: hsl(var(--card) / 0.975);
@@ -86,7 +86,7 @@ body {
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .panel-head h2 {
@@ -105,12 +105,12 @@ body {
 .quick-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
 }
 
 .stat-card {
-    min-height: 92px;
-    padding: 12px 14px;
+    min-height: 72px;
+    padding: 10px 12px;
     border-radius: 14px;
     border: 1px solid hsl(var(--border) / 0.85);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 249, 255, 0.98) 100%);
@@ -118,7 +118,7 @@ body {
 
 .stat-label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: hsl(var(--muted-foreground));
     font-size: 0.72rem;
     font-weight: 700;
@@ -129,7 +129,7 @@ body {
 .stat-value {
     display: block;
     color: hsl(var(--foreground));
-    font-size: 1.06rem;
+    font-size: 1rem;
     font-weight: 700;
     line-height: 1.25;
 }
@@ -206,6 +206,11 @@ body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
+    align-items: start;
+}
+
+.secondary-grid > .panel {
+    align-self: start;
 }
 
 .group-list {
@@ -218,8 +223,8 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    padding: 12px 14px;
-    border-radius: 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
     border: 1px solid hsl(var(--border) / 0.82);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 249, 255, 0.98) 100%);
 }
@@ -227,24 +232,26 @@ body {
 .group-key {
     font-weight: 600;
     word-break: break-word;
+    font-size: 0.96rem;
 }
 
 .group-value {
     color: hsl(var(--foreground));
     font-weight: 700;
     white-space: nowrap;
+    font-size: 0.94rem;
 }
 
 .upgrade-panel {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 18px;
+    gap: 16px;
 }
 
 .upgrade-copy h2 {
     margin: 0 0 4px;
-    font-size: 1.08rem;
+    font-size: 1rem;
 }
 
 .upgrade-copy p:last-child {
@@ -256,9 +263,9 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 196px;
-    height: 42px;
-    padding: 0 18px;
+    min-width: 188px;
+    height: 40px;
+    padding: 0 16px;
     border-radius: 999px;
     background: hsl(var(--primary));
     color: hsl(var(--primary-foreground));

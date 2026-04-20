@@ -379,15 +379,15 @@ function renderGroup(title, description, items, root) {
             <p class="panel-copy">${escapeHtml(description)}</p>
         </div>
         <div class="group-list">
-            ${items.map(renderGroupRow).join('')}
+            ${items.map(item => renderGroupRow(title, item)).join('')}
         </div>
     `;
 }
 
-function renderGroupRow(item) {
+function renderGroupRow(title, item) {
     return `
         <div class="group-row">
-            <span class="group-key">${escapeHtml(item.key || 'Unknown')}</span>
+            <span class="group-key">${escapeHtml(formatGroupKey(title, item.key || 'Unknown'))}</span>
             <span class="group-value">${escapeHtml(formatDuration(item.totalMs || 0))}</span>
         </div>
     `;
@@ -434,6 +434,25 @@ function formatRangeLabel(startTimestamp, endTimestamp) {
         return `${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} to ${end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
     } catch (_) {
         return 'Unknown';
+    }
+}
+
+function formatGroupKey(title, key) {
+    if (title === 'By repository') {
+        return formatRepositoryLabel(key);
+    }
+    return key;
+}
+
+function formatRepositoryLabel(value) {
+    const text = String(value || '').trim();
+    if (!text) return 'Unknown';
+    try {
+        const url = new URL(text);
+        const cleaned = url.pathname.replace(/^\/+|\/+$/g, '').replace(/\.git$/i, '');
+        return cleaned || text;
+    } catch (_) {
+        return text.replace(/\.git$/i, '');
     }
 }
 
