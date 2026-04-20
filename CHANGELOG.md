@@ -1,5 +1,18 @@
 # CHANGELOG
 
+### 0.10.5 (2026/04/20)
+
+1. Local fallback history
+	- The extension now persists a separate local raw activity history in extension storage, even when Slashcoded Desktop is not installed or detected.
+	- Local reporting no longer depends on the transport queue surviving until upload.
+2. Built-in fallback report
+	- `CodingTracker: Show Report` now opens a minimal built-in local summary when Desktop is unavailable.
+	- The fallback report groups totals by activity, repository, branch, and file extension.
+3. UX
+	- The built-in local summary includes a direct Slashcoded Desktop download CTA for users who want richer analytics.
+4. Verification
+	- Added focused `node:test` coverage for local history persistence, report aggregation, and the fallback report server/UI shell.
+
 ### 0.10.4 (2026/04/14)
 
 1. Shared host timing integration

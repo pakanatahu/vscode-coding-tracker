@@ -26,11 +26,13 @@ All part of this extension(included server program, documents) are open-source a
 - AI Chat tracking across providers with context-key heuristics and focus-aware detection
 - Records coding time, file edits, focus switches, and editor usage to differentiate reading vs writing
 - Captures sync status, upload queue depth, and desktop app connectivity health for SlashCoded
+- Stores a local raw activity history even when Slashcoded Desktop is not installed
+- Built-in fallback summary report grouped by activity, repository, branch, and file extension
 - Proxy and timeout configuration for uploads
 
 ## Useful commands
 
-- `CodingTracker: Show Report` to inspect the latest activity log
+- `CodingTracker: Show Report` to open Slashcoded Desktop when available, otherwise the built-in local summary
 - `CodingTracker: Start Local Server` / `Stop Local Server` to control the ingest service
 - `CodingTracker: Flush Upload Queue` to retry stalled uploads
 - `CodingTracker: Toggle state logging` to write mode transition details to the Coding Tracker output channel
@@ -72,8 +74,9 @@ Install from VSIX:
 
 1. Install the extension (Marketplace or VSIX)
 2. Run `CodingTracker: Set Upload Token` and paste your secure token
-3. Start the SlashCoded desktop app (or run `CodingTracker: Start Local Server`) so the local ingest endpoint is available
-4. Use `CodingTracker: Show Sync Status` to confirm the bridge and `CodingTracker: Show Report` to open the latest log
+3. If Slashcoded Desktop is installed, start it so the extension can discover the local API automatically
+4. If Slashcoded Desktop is not installed, the extension still tracks locally and `CodingTracker: Show Report` opens the built-in local summary UI
+5. Use `CodingTracker: Show Sync Status` to confirm whether Desktop was discovered and `CodingTracker: Show Report` to open the relevant report
 
 ## Configuration
 
@@ -98,7 +101,9 @@ Once installed, the desktop app exposes the same local endpoint the extension us
 
 ### View your report
 
-Run `CodingTracker: Show Report` to open the local report UI served by the desktop app or the built-in ingest helper.
+Run `CodingTracker: Show Report` to open the Desktop-hosted report when Slashcoded Desktop is online. If Desktop is not installed or not detected, the extension falls back to a minimal local summary generated from the raw locally stored event history on your machine.
+
+The fallback report is intentionally lightweight. It shows grouped totals by activity, repository, branch, and file extension so tracking remains useful without any separate install. For richer history and more advanced analytics, use the Slashcoded Desktop download link shown in that fallback UI.
 
 ## Contributing
 

@@ -408,7 +408,7 @@ Implementation notes:
 Run: `node --test test/staticWebServer.test.js`
 Expected: PASS
 
-- [ ] **Step 6: Commit the task-specific changes**
+- [x] **Step 6: Commit the task-specific changes**
 
 If the task only changed files owned by this task:
 
@@ -429,14 +429,13 @@ git commit -m "feat: add fallback local report ui"
 
 **Files:**
 - Modify: `README.md`
-- Modify: `package.json`
 - Modify: `package.nls.json`
 - Modify: `CHANGELOG.md`
 - Test: `test/localHistoryStore.test.js`
 - Test: `test/localReportAggregator.test.js`
 - Test: `test/staticWebServer.test.js`
 
-- [ ] **Step 1: Write the failing documentation checklist in the plan branch**
+- [x] **Step 1: Write the failing documentation checklist in the plan branch**
 
 Add these doc requirements to the task checklist before editing:
 
@@ -446,25 +445,25 @@ Add these doc requirements to the task checklist before editing:
 - Changelog records the new fallback local analytics/report behavior.
 ```
 
-- [ ] **Step 2: Update user-facing text and docs**
+- [x] **Step 2: Update user-facing text and docs**
 
 Required edits:
 - `README.md`
   - Update Quick Start and View your report sections.
   - Add one paragraph that local history is stored on the machine even when Desktop is missing.
   - Mention that the fallback report is intentionally minimal and Desktop provides richer analytics.
-- `package.json` and `package.nls.json`
+- `package.nls.json`
   - Adjust the `codingTracker.showReport` title/description text only if needed to reflect the fallback behavior.
   - Do not add new commands unless implementation truly requires them.
 - `CHANGELOG.md`
   - Add a release note for local fallback tracking/reporting.
 
-- [ ] **Step 3: Run the focused test suite**
+- [x] **Step 3: Run the focused test suite**
 
 Run: `node --test test/localHistoryStore.test.js test/localReportAggregator.test.js test/staticWebServer.test.js`
 Expected: PASS
 
-- [ ] **Step 4: Run the repo test entrypoint**
+- [x] **Step 4: Run the repo test entrypoint**
 
 Run: `npm run test:node`
 Expected: PASS with the new tests included alongside the existing suite
@@ -474,14 +473,14 @@ Expected: PASS with the new tests included alongside the existing suite
 If the task only changed files owned by this task:
 
 ```bash
-git add README.md package.json package.nls.json CHANGELOG.md test/localHistoryStore.test.js test/localReportAggregator.test.js test/staticWebServer.test.js
+git add README.md package.nls.json CHANGELOG.md test/localHistoryStore.test.js test/localReportAggregator.test.js test/staticWebServer.test.js
 git commit -m "docs: describe fallback local reporting"
 ```
 
 If one of those files also contains unrelated pre-existing edits, stage only this task's hunks:
 
 ```bash
-git add README.md package.json package.nls.json CHANGELOG.md
+git add README.md package.nls.json CHANGELOG.md
 git add -p test/localHistoryStore.test.js
 git add -p test/localReportAggregator.test.js
 git add -p test/staticWebServer.test.js
