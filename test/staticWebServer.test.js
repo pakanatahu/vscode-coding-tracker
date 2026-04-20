@@ -46,6 +46,44 @@ test('report route serves the fallback app shell', async () => {
     }
 });
 
+test('report route serves the desktop-style fallback dashboard shell', async () => {
+    const staticDir = path.join(__dirname, '..', 'server-app');
+    const server = start({
+        staticDir,
+        port: 0,
+        debugLog: () => {},
+        getReportSummary: async () => ({ totals: {}, chart24h: {}, byActivity: [] })
+    });
+
+    try {
+        await waitForServer(server);
+        const html = await httpGetText(`${server.url}/report/`);
+        assert.match(html, /dashboard-shell/);
+        assert.match(html, /quick-stats/);
+        assert.match(html, /chart24h-card/);
+    } finally {
+        server.close();
+    }
+});
+
+test('static server serves the chart.js vendor asset', async () => {
+    const staticDir = path.join(__dirname, '..', 'server-app');
+    const server = start({
+        staticDir,
+        port: 0,
+        debugLog: () => {},
+        getReportSummary: async () => ({ totals: { totalMs: 1234 }, byActivity: [] })
+    });
+
+    try {
+        await waitForServer(server);
+        const script = await httpGetText(`${server.url}/vendor/chart.js/chart.umd.js`);
+        assert.match(script, /Chart/);
+    } finally {
+        server.close();
+    }
+});
+
 async function httpGetJson(url) {
     const response = await httpGet(url);
     return JSON.parse(response.body);

@@ -7,25 +7,34 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <main class="report-shell">
-        <header class="hero">
+    <main class="dashboard-shell">
+        <header class="dashboard-header">
             <p class="eyebrow">Local fallback report</p>
             <h1>Local Activity Summary</h1>
-            <p class="lede">Minimal stats generated directly from the locally stored VS Code tracking data on this machine.</p>
+            <p class="lede">A lightweight desktop dashboard generated directly from the locally stored VS Code tracking data on this machine.</p>
         </header>
 
-        <section id="totals" class="card"></section>
-        <section id="activity-groups" class="card"><h2>By activity</h2></section>
-        <section id="repo-groups" class="card"><h2>By repository</h2></section>
-        <section id="branch-groups" class="card"><h2>By branch</h2></section>
-        <section id="extension-groups" class="card"><h2>By file extension</h2></section>
+        <section id="quick-stats" class="panel quick-stats"></section>
+        <section id="chart24h" class="panel chart24h-card"></section>
 
-        <aside class="desktop-cta card">
-            <p>Want more advanced analytics? Download Slashcoded Desktop.</p>
+        <section id="secondary-breakdowns" class="secondary-grid">
+            <section id="activity-groups" class="panel"><h2>By activity</h2></section>
+            <section id="repo-groups" class="panel"><h2>By repository</h2></section>
+            <section id="branch-groups" class="panel"><h2>By branch</h2></section>
+            <section id="extension-groups" class="panel"><h2>By file extension</h2></section>
+        </section>
+
+        <aside id="desktop-cta" class="panel upgrade-panel">
+            <div class="upgrade-copy">
+                <p class="eyebrow">Upgrade</p>
+                <h2>Want more advanced analytics?</h2>
+                <p>Open richer history and deeper breakdowns in Slashcoded Desktop.</p>
+            </div>
             <a class="cta-link" href="https://lundholm.io/project/slashcoded" target="_blank" rel="noreferrer">Get Slashcoded Desktop</a>
         </aside>
     </main>
 
+    <script src="/vendor/chart.js/chart.umd.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>
