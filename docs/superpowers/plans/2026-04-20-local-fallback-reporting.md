@@ -109,7 +109,7 @@ Implementation notes:
 Run: `node --test test/localHistoryStore.test.js`
 Expected: PASS
 
-- [ ] **Step 6: Commit the task-specific changes**
+- [x] **Step 6: Commit the task-specific changes**
 
 If the task only changed files owned by this task:
 
@@ -133,7 +133,7 @@ git commit -m "feat: persist local activity history"
 - Modify: `lib/localReport/historyStore.js`
 - Test: `test/localReportAggregator.test.js`
 
-- [ ] **Step 1: Write the failing aggregation tests**
+- [x] **Step 1: Write the failing aggregation tests**
 
 ```js
 const test = require('node:test');
@@ -170,12 +170,12 @@ test('buildReportSummary normalizes missing repo, branch, and extension labels',
 });
 ```
 
-- [ ] **Step 2: Run the aggregation tests to verify they fail**
+- [x] **Step 2: Run the aggregation tests to verify they fail**
 
 Run: `node --test test/localReportAggregator.test.js`
 Expected: FAIL with `Cannot find module '../lib/localReport/reportAggregator'`
 
-- [ ] **Step 3: Implement the minimal raw-event aggregator**
+- [x] **Step 3: Implement the minimal raw-event aggregator**
 
 ```js
 function buildReportSummary(events) {
@@ -198,7 +198,7 @@ Implementation notes:
 - Sort each group descending by `totalMs`, then ascending by `key` for deterministic tests and a stable UI.
 - Expose a second helper for date-window filtering if needed by the server, but do not precompute or cache snapshots yet.
 
-- [ ] **Step 4: Add a history-store helper to return already-parsed report events**
+- [x] **Step 4: Add a history-store helper to return already-parsed report events**
 
 ```js
 async function readReportEvents() {
@@ -207,7 +207,7 @@ async function readReportEvents() {
 }
 ```
 
-- [ ] **Step 5: Run the aggregation tests to verify they pass**
+- [x] **Step 5: Run the aggregation tests to verify they pass**
 
 Run: `node --test test/localReportAggregator.test.js`
 Expected: PASS
