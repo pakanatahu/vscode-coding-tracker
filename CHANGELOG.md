@@ -8,10 +8,15 @@
 2. Built-in fallback report
 	- `CodingTracker: Show Report` now opens a minimal built-in local summary when Desktop is unavailable.
 	- The fallback report groups totals by activity, repository, branch, and file extension.
+	- The fallback report now uses a compact desktop-style dashboard layout instead of a plain stacked summary page.
+	- The `Last 24 hours` card now follows the shared Slashcoded Chart.js area-chart treatment more closely, including the footer breakdown toolbar.
 3. UX
 	- The built-in local summary includes a direct Slashcoded Desktop download CTA for users who want richer analytics.
 4. Verification
 	- Added focused `node:test` coverage for local history persistence, report aggregation, and the fallback report server/UI shell.
+5. Desktop handoff behavior
+	- When Slashcoded Desktop is not detected, live events are now stored locally for the fallback dashboard instead of being added to the upload queue automatically.
+	- Added `CodingTracker: Queue Local History for Desktop Ingestion` so users can explicitly move local-only history into the queue when they want Slashcoded Desktop to import it.
 
 ### 0.10.4 (2026/04/14)
 

@@ -27,13 +27,14 @@ All part of this extension(included server program, documents) are open-source a
 - Records coding time, file edits, focus switches, and editor usage to differentiate reading vs writing
 - Captures sync status, upload queue depth, and desktop app connectivity health for SlashCoded
 - Stores a local raw activity history even when Slashcoded Desktop is not installed
-- Built-in fallback summary report grouped by activity, repository, branch, and file extension
+- Built-in fallback summary dashboard grouped by activity, repository, branch, and file extension
 - Proxy and timeout configuration for uploads
 
 ## Useful commands
 
 - `CodingTracker: Show Report` to open Slashcoded Desktop when available, otherwise the built-in local summary
 - `CodingTracker: Start Local Server` / `Stop Local Server` to control the ingest service
+- `CodingTracker: Queue Local History for Desktop Ingestion` to move local-only fallback history into the upload queue before or after installing Slashcoded Desktop
 - `CodingTracker: Flush Upload Queue` to retry stalled uploads
 - `CodingTracker: Toggle state logging` to write mode transition details to the Coding Tracker output channel
 - `CodingTracker: Set Upload Token` to rotate credentials securely
@@ -75,8 +76,9 @@ Install from VSIX:
 1. Install the extension (Marketplace or VSIX)
 2. Run `CodingTracker: Set Upload Token` and paste your secure token
 3. If Slashcoded Desktop is installed, start it so the extension can discover the local API automatically
-4. If Slashcoded Desktop is not installed, the extension still tracks locally and `CodingTracker: Show Report` opens the built-in local summary UI
-5. Use `CodingTracker: Show Sync Status` to confirm whether Desktop was discovered and `CodingTracker: Show Report` to open the relevant report
+4. If Slashcoded Desktop is not installed, the extension stores events locally and `CodingTracker: Show Report` opens the built-in local summary UI
+5. When you later want Slashcoded Desktop to ingest that local-only history, run `CodingTracker: Queue Local History for Desktop Ingestion`
+6. Use `CodingTracker: Show Sync Status` to confirm whether Desktop was discovered and `CodingTracker: Show Report` to open the relevant report
 
 ## Configuration
 
@@ -103,7 +105,11 @@ Once installed, the desktop app exposes the same local endpoint the extension us
 
 Run `CodingTracker: Show Report` to open the Desktop-hosted report when Slashcoded Desktop is online. If Desktop is not installed or not detected, the extension falls back to a minimal local summary generated from the raw locally stored event history on your machine.
 
-The fallback report is intentionally lightweight. It shows grouped totals by activity, repository, branch, and file extension so tracking remains useful without any separate install. For richer history and more advanced analytics, use the Slashcoded Desktop download link shown in that fallback UI.
+The fallback report is intentionally lightweight, but it now uses a desktop-style dashboard layout instead of a plain stacked summary page. Its `Last 24 hours` chart is rendered with the same Chart.js visual grammar used by Slashcoded's shared area chart, and the surrounding quick stats and grouped panels are composed to feel closer to the main desktop dashboard.
+
+The fallback dashboard still focuses on the data the extension truly has locally: grouped totals by activity, repository, branch, and file extension. For richer history and more advanced analytics, use the Slashcoded Desktop download link shown in that fallback UI.
+
+When Desktop is unavailable, live events stay in the local history file and are not added to the upload queue automatically. When you are ready to hand that history off to Slashcoded Desktop, run `CodingTracker: Queue Local History for Desktop Ingestion`. That command moves the current local-only backlog into `queue.json`, after which the Desktop uploader can drain it normally.
 
 ## Contributing
 

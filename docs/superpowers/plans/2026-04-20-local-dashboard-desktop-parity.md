@@ -110,7 +110,7 @@ Run: `rg -n "Desktop layout uses a compact dashboard shell|Top legend pills are 
 
 Expected: two matches in this plan file
 
-- [ ] **Step 3: Commit the task-specific changes**
+- [x] **Step 3: Commit the task-specific changes**
 
 ```bash
 git add docs/superpowers/plans/2026-04-20-local-dashboard-desktop-parity.md
@@ -173,7 +173,7 @@ Run: `node --test test/localReportAggregator.test.js`
 
 Expected: PASS
 
-- [ ] **Step 5: Commit the task-specific changes**
+- [x] **Step 5: Commit the task-specific changes**
 
 ```bash
 git add lib/localReport/reportAggregator.js test/localReportAggregator.test.js
@@ -190,7 +190,7 @@ git commit -m "test: lock desktop chart summary metadata"
 - Consult: `C:\github\Coding-Tracker-Server\frontend\src\app\features\dashboard\overview\overview-header-strip.component.ts`
 - Consult: `C:\github\Coding-Tracker-Server\frontend\src\app\features\dashboard\overview\overview-activity-panels.component.ts`
 
-- [ ] **Step 1: Write the failing shell test for the desktop dashboard composition**
+- [x] **Step 1: Write the failing shell test for the desktop dashboard composition**
 
 Add a test like this to `test/staticWebServer.test.js`:
 
@@ -211,13 +211,13 @@ test('report route serves the desktop-style fallback dashboard shell', async () 
 });
 ```
 
-- [ ] **Step 2: Run the focused static server test to verify it fails**
+- [x] **Step 2: Run the focused static server test to verify it fails**
 
 Run: `node --test test/staticWebServer.test.js`
 
 Expected: FAIL because the new shell hooks are not in the HTML yet
 
-- [ ] **Step 3: Replace the page shell markup with a dashboard layout**
+- [x] **Step 3: Replace the page shell markup with a dashboard layout**
 
 Change `server-app/index.html` to use sections like:
 
@@ -236,7 +236,7 @@ Change `server-app/index.html` to use sections like:
 </main>
 ```
 
-- [ ] **Step 4: Rewire `server-app/app.js` so it renders the new shell targets**
+- [x] **Step 4: Rewire `server-app/app.js` so it renders the new shell targets**
 
 Update the render flow so:
 
@@ -248,7 +248,7 @@ renderGroup(...document.querySelector('#activity-groups'));
 
 and remove the old `#totals`-first report mindset.
 
-- [ ] **Step 5: Rebuild `server-app/styles.css` around Slashcoded-like desktop card rules**
+- [x] **Step 5: Rebuild `server-app/styles.css` around Slashcoded-like desktop card rules**
 
 Implement tokens and layout rules patterned after Slashcoded:
 
@@ -259,13 +259,13 @@ Implement tokens and layout rules patterned after Slashcoded:
 .quick-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
 ```
 
-- [ ] **Step 6: Run the focused static server test to verify it passes**
+- [x] **Step 6: Run the focused static server test to verify it passes**
 
 Run: `node --test test/staticWebServer.test.js`
 
 Expected: PASS
 
-- [ ] **Step 7: Commit the task-specific changes**
+- [x] **Step 7: Commit the task-specific changes**
 
 ```bash
 git add server-app/index.html server-app/app.js server-app/styles.css test/staticWebServer.test.js
@@ -280,7 +280,7 @@ git commit -m "feat: rebuild fallback dashboard shell for desktop parity"
 - Consult: `C:\github\Coding-Tracker-Server\frontend\src\app\features\dashboard\overview\overview-activity-panels.component.ts`
 - Consult: `C:\github\Coding-Tracker-Server\frontend\src\app\shared\charts\area-chart.component.ts`
 
-- [ ] **Step 1: Write the failing UI shell test for the breakdown toolbar**
+- [x] **Step 1: Write the failing UI shell test for the breakdown toolbar**
 
 Add or update a test in `test/staticWebServer.test.js` with:
 
@@ -289,13 +289,13 @@ assert.match(html, /Break down by/);
 assert.match(html, /toolbar-chip/);
 ```
 
-- [ ] **Step 2: Run the focused static server test to verify it fails**
+- [x] **Step 2: Run the focused static server test to verify it fails**
 
 Run: `node --test test/staticWebServer.test.js`
 
 Expected: FAIL because the chart footer toolbar is not rendered yet
 
-- [ ] **Step 3: Remove the top legend pills from the chart renderer**
+- [x] **Step 3: Remove the top legend pills from the chart renderer**
 
 Delete the `renderLegendPill()`-driven block from `render24HourChart()` and stop rendering:
 
@@ -303,7 +303,7 @@ Delete the `renderLegendPill()`-driven block from `render24HourChart()` and stop
 <div class="legend-pills">...</div>
 ```
 
-- [ ] **Step 4: Add a footer toolbar that mirrors Slashcoded’s chart controls**
+- [x] **Step 4: Add a footer toolbar that mirrors Slashcoded’s chart controls**
 
 Render this structure at the bottom of the chart card:
 
@@ -314,7 +314,7 @@ Render this structure at the bottom of the chart card:
 </div>
 ```
 
-- [ ] **Step 5: Style the toolbar chips to match Slashcoded’s desktop treatment**
+- [x] **Step 5: Style the toolbar chips to match Slashcoded’s desktop treatment**
 
 Add styles like:
 
@@ -324,13 +324,13 @@ Add styles like:
 .toolbar-chip.active { background:hsl(var(--foreground)); color:hsl(var(--card)); border-color:hsl(var(--foreground)); }
 ```
 
-- [ ] **Step 6: Run the focused static server test to verify it passes**
+- [x] **Step 6: Run the focused static server test to verify it passes**
 
 Run: `node --test test/staticWebServer.test.js`
 
 Expected: PASS
 
-- [ ] **Step 7: Commit the task-specific changes**
+- [x] **Step 7: Commit the task-specific changes**
 
 ```bash
 git add server-app/app.js server-app/styles.css test/staticWebServer.test.js
@@ -346,23 +346,24 @@ git commit -m "feat: add slashcoded-style breakdown toolbar"
 - Consult: `C:\github\Coding-Tracker-Server\frontend\src\app\shared\charts\chart-theme.ts`
 - Consult: `C:\github\Coding-Tracker-Server\frontend\src\app\features\dashboard\overview\overview-activity-panels.component.ts`
 
-- [ ] **Step 1: Write the failing chart-focused assertions in the static shell test**
+- [x] **Step 1: Adjust the chart-focused checkpoint to runtime verification**
 
-Add expectations like:
+Static shell assertions are not sufficient for runtime Chart.js chrome. Use a browser verification step instead:
 
-```js
-assert.doesNotMatch(html, /legend-pills/);
-assert.doesNotMatch(html, /chart-corner-badge/);
-assert.match(html, /chart24h-card/);
+```md
+- verify the chart no longer renders top legend pills
+- verify the chart no longer renders the floating now badge
+- verify the chart no longer renders the corner `H` badge
+- verify the x-axis is calmer than the previous rotated-every-hour version
 ```
 
-- [ ] **Step 2: Run the focused static server test to verify it fails**
+- [x] **Step 2: Confirm the old chart chrome was still present before the cleanup**
 
-Run: `node --test test/staticWebServer.test.js`
+Run: browser check of `http://127.0.0.1:10345/report/`
 
-Expected: FAIL because old chart chrome still exists
+Expected: old runtime chart still shows the copied fallback chrome before cleanup
 
-- [ ] **Step 3: Remove leftover chart ornament that does not exist in Slashcoded**
+- [x] **Step 3: Remove leftover chart ornament that does not exist in Slashcoded**
 
 Delete these fallback-specific elements from `render24HourChart()` and CSS:
 
@@ -372,7 +373,7 @@ Delete these fallback-specific elements from `render24HourChart()` and CSS:
 <div class="chart-corner-badge">H</div>
 ```
 
-- [ ] **Step 4: Port the Slashcoded area-chart options more faithfully**
+- [x] **Step 4: Port the Slashcoded area-chart options more faithfully**
 
 Update the Chart.js options in `server-app/app.js` to mirror the referenced shared component:
 
@@ -390,7 +391,7 @@ and keep only the plugin behaviors that improve parity:
 - restrained vertical hover guide
 - no decorative “now” badge if Slashcoded does not show it in this surface
 
-- [ ] **Step 5: Tone down the chart card’s visual weight**
+- [x] **Step 5: Tone down the chart card’s visual weight**
 
 Adjust `server-app/styles.css` so the chart card behaves like a normal dashboard module:
 
@@ -400,13 +401,17 @@ Adjust `server-app/styles.css` so the chart card behaves like a normal dashboard
 .chart-canvas-wrap { height: 320px; }
 ```
 
-- [ ] **Step 6: Run the focused static server test to verify it passes**
+- [x] **Step 6: Run the focused checks to verify it passes**
 
-Run: `node --test test/staticWebServer.test.js`
+Run:
 
-Expected: PASS
+- `node --test test/staticWebServer.test.js`
+- `npm run bundle`
+- browser refresh of `http://127.0.0.1:10345/report/`
 
-- [ ] **Step 7: Commit the task-specific changes**
+Expected: tests pass and the chart card renders with reduced chrome
+
+- [x] **Step 7: Commit the task-specific changes**
 
 ```bash
 git add server-app/app.js server-app/styles.css test/staticWebServer.test.js
@@ -420,22 +425,23 @@ git commit -m "feat: tune 24h chart card for slashcoded parity"
 - Modify: `server-app/styles.css`
 - Consult: `C:\github\Coding-Tracker-Server\frontend\src\app\features\dashboard\overview\overview-header-strip.component.ts`
 
-- [ ] **Step 1: Write the failing shell test for compact quick stats**
+- [x] **Step 1: Adjust the quick-stats checkpoint to runtime verification**
 
-Add assertions like:
+Static shell assertions are not enough because the compact quick-stats cards are rendered at runtime. Use browser verification plus the focused static-server test:
 
-```js
-assert.match(html, /Quick stats/);
-assert.match(html, /stat-card/);
+```md
+- verify the quick-stats strip is denser than the original overview tiles
+- verify repository labels are shortened to readable desktop-friendly text
+- verify the secondary panels no longer feel oversized relative to their content
 ```
 
-- [ ] **Step 2: Run the focused static server test to verify it fails**
+- [x] **Step 2: Confirm the pre-compression desktop layout was still too loose**
 
-Run: `node --test test/staticWebServer.test.js`
+Run: desktop browser check of `http://127.0.0.1:10345/report/`
 
-Expected: FAIL because the old oversized overview tiles still exist
+Expected: quick stats and secondary cards still read too tall and too padded before compression
 
-- [ ] **Step 3: Replace the current overview block with a compact quick-stats strip**
+- [x] **Step 3: Replace the current overview block with a compact quick-stats strip**
 
 Render a structure like:
 
@@ -450,7 +456,7 @@ Render a structure like:
 </div>
 ```
 
-- [ ] **Step 4: Restyle grouped breakdown panels as secondary dashboard modules**
+- [x] **Step 4: Restyle grouped breakdown panels as secondary dashboard modules**
 
 Update the group panels so they use lighter section headings and denser rows:
 
@@ -460,13 +466,16 @@ Update the group panels so they use lighter section headings and denser rows:
 .panel-copy { font-size: .82rem; color: hsl(var(--muted-foreground)); }
 ```
 
-- [ ] **Step 5: Run the focused static server test to verify it passes**
+- [x] **Step 5: Run the focused checks to verify it passes**
 
-Run: `node --test test/staticWebServer.test.js`
+Run:
 
-Expected: PASS
+- `node --test test/staticWebServer.test.js`
+- desktop browser refresh of `http://127.0.0.1:10345/report/`
 
-- [ ] **Step 6: Commit the task-specific changes**
+Expected: tests pass and the desktop layout reads denser and calmer
+
+- [x] **Step 6: Commit the task-specific changes**
 
 ```bash
 git add server-app/app.js server-app/styles.css test/staticWebServer.test.js
@@ -481,7 +490,7 @@ git commit -m "feat: compress quick stats and secondary panels"
 - Modify: `server-app/styles.css`
 - Test: `test/staticWebServer.test.js`
 
-- [ ] **Step 1: Write the failing shell test for the restrained upgrade panel**
+- [x] **Step 1: Write the failing shell test for the restrained upgrade panel**
 
 Add assertions like:
 
@@ -490,13 +499,13 @@ assert.match(html, /Want more advanced analytics\?/);
 assert.match(html, /upgrade-panel/);
 ```
 
-- [ ] **Step 2: Run the focused static server test to verify it fails**
+- [x] **Step 2: Run the focused static server test to verify it fails**
 
 Run: `node --test test/staticWebServer.test.js`
 
 Expected: FAIL if the CTA still only exists as the old footer block
 
-- [ ] **Step 3: Render the CTA as a compact dashboard panel**
+- [x] **Step 3: Render the CTA as a compact dashboard panel**
 
 Use markup like:
 
@@ -511,7 +520,7 @@ Use markup like:
 </aside>
 ```
 
-- [ ] **Step 4: Restyle the CTA to sit within the same dashboard grammar**
+- [x] **Step 4: Restyle the CTA to sit within the same dashboard grammar**
 
 Add styles like:
 
@@ -520,13 +529,13 @@ Add styles like:
 .upgrade-link { text-decoration:none; }
 ```
 
-- [ ] **Step 5: Run the focused static server test to verify it passes**
+- [x] **Step 5: Run the focused static server test to verify it passes**
 
 Run: `node --test test/staticWebServer.test.js`
 
 Expected: PASS
 
-- [ ] **Step 6: Commit the task-specific changes**
+- [x] **Step 6: Commit the task-specific changes**
 
 ```bash
 git add server-app/index.html server-app/app.js server-app/styles.css test/staticWebServer.test.js
@@ -542,19 +551,19 @@ git commit -m "feat: integrate desktop upgrade panel into dashboard"
 - Verify: `server-app/styles.css`
 - Verify: `server-app/app.js`
 
-- [ ] **Step 1: Run the Node test suite**
+- [x] **Step 1: Run the Node test suite**
 
 Run: `npm run test:node`
 
 Expected: PASS
 
-- [ ] **Step 2: Rebuild the extension bundle**
+- [x] **Step 2: Rebuild the extension bundle**
 
 Run: `npm run bundle`
 
 Expected: PASS with `dist/extension.js` emitted
 
-- [ ] **Step 3: Verify the fallback dashboard in a real browser against Slashcoded**
+- [x] **Step 3: Verify the fallback dashboard in a real browser against Slashcoded**
 
 Use Playwright or an equivalent real browser workflow to compare:
 
@@ -568,7 +577,7 @@ Verify all of the following:
 - the chart no longer uses the old top legend pills or decorative `H` badge
 - quick stats and group panels read as secondary modules, not hero tiles
 
-- [ ] **Step 4: Update docs to describe the desktop-style fallback dashboard**
+- [x] **Step 4: Update docs to describe the desktop-style fallback dashboard**
 
 Add concise notes to `README.md` and `CHANGELOG.md`:
 
