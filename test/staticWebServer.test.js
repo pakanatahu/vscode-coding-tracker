@@ -85,6 +85,25 @@ test('report route serves the chart footer breakdown toolbar', async () => {
     }
 });
 
+test('report route serves the integrated desktop upgrade panel', async () => {
+    const staticDir = path.join(__dirname, '..', 'server-app');
+    const server = start({
+        staticDir,
+        port: 0,
+        debugLog: () => {},
+        getReportSummary: async () => ({ totals: {}, chart24h: {}, byActivity: [] })
+    });
+
+    try {
+        await waitForServer(server);
+        const html = await httpGetText(`${server.url}/report/`);
+        assert.match(html, /upgrade-panel/);
+        assert.match(html, /Want more advanced analytics\?/);
+    } finally {
+        server.close();
+    }
+});
+
 test('static server serves the chart.js vendor asset', async () => {
     const staticDir = path.join(__dirname, '..', 'server-app');
     const server = start({
