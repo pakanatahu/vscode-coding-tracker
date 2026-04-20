@@ -319,7 +319,7 @@ Implementation notes:
 Run: `node --test test/staticWebServer.test.js`
 Expected: PASS
 
-- [ ] **Step 6: Commit the task-specific changes**
+- [x] **Step 6: Commit the task-specific changes**
 
 If the task only changed files owned by this task:
 
@@ -345,7 +345,7 @@ git commit -m "feat: serve fallback local report api"
 - Modify: `lib/LocalServer.js`
 - Test: `test/staticWebServer.test.js`
 
-- [ ] **Step 1: Write the failing UI-serving assertion**
+- [x] **Step 1: Write the failing UI-serving assertion**
 
 ```js
 test('report route serves the fallback app shell', async () => {
@@ -355,12 +355,12 @@ test('report route serves the fallback app shell', async () => {
 });
 ```
 
-- [ ] **Step 2: Run the server tests to verify they fail**
+- [x] **Step 2: Run the server tests to verify they fail**
 
 Run: `node --test test/staticWebServer.test.js`
 Expected: FAIL because `server-app/index.html` does not exist yet
 
-- [ ] **Step 3: Implement the minimal report shell**
+- [x] **Step 3: Implement the minimal report shell**
 
 ```html
 <main class="report-shell">
@@ -382,7 +382,7 @@ Expected: FAIL because `server-app/index.html` does not exist yet
 </main>
 ```
 
-- [ ] **Step 4: Implement the plain JS renderer**
+- [x] **Step 4: Implement the plain JS renderer**
 
 ```js
 async function loadSummary() {
@@ -403,7 +403,7 @@ Implementation notes:
 - Show an empty state (`No local activity recorded yet.`) when the history file exists but has no valid records.
 - The CTA copy should closely match the spec: `Want more advanced analytics? Download Slashcoded Desktop.`
 
-- [ ] **Step 5: Run the updated server tests to verify they pass**
+- [x] **Step 5: Run the updated server tests to verify they pass**
 
 Run: `node --test test/staticWebServer.test.js`
 Expected: PASS
