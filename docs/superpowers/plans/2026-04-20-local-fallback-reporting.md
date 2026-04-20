@@ -212,7 +212,7 @@ async function readReportEvents() {
 Run: `node --test test/localReportAggregator.test.js`
 Expected: PASS
 
-- [ ] **Step 6: Commit the task-specific changes**
+- [x] **Step 6: Commit the task-specific changes**
 
 If the task only changed files owned by this task:
 
@@ -234,10 +234,9 @@ git commit -m "feat: add local report aggregation"
 **Files:**
 - Modify: `lib/StaticWebServer.js`
 - Modify: `lib/LocalServer.js`
-- Modify: `lib/core/configuration.js`
 - Test: `test/staticWebServer.test.js`
 
-- [ ] **Step 1: Write the failing server tests**
+- [x] **Step 1: Write the failing server tests**
 
 ```js
 const test = require('node:test');
@@ -260,12 +259,12 @@ test('static server returns local report summary json', async () => {
 });
 ```
 
-- [ ] **Step 2: Run the server tests to verify they fail**
+- [x] **Step 2: Run the server tests to verify they fail**
 
 Run: `node --test test/staticWebServer.test.js`
 Expected: FAIL because `start(...)` does not accept a report-summary provider
 
-- [ ] **Step 3: Extend the static server with report API endpoints**
+- [x] **Step 3: Extend the static server with report API endpoints**
 
 ```js
 function start({ staticDir, port, debugLog, getReportSummary }) {
@@ -295,7 +294,7 @@ Implementation notes:
 }
 ```
 
-- [ ] **Step 4: Make `showReport` and the built-in server choose the fallback path when Desktop is unavailable**
+- [x] **Step 4: Make `showReport` and the built-in server choose the fallback path when Desktop is unavailable**
 
 ```js
 async function showReport() {
@@ -315,7 +314,7 @@ Implementation notes:
 - If Desktop is absent, lazily start the built-in report server and open its `/report/` page.
 - Keep the existing `codingTracker.startLocalServer` / `stopLocalServer` commands usable for the fallback report server.
 
-- [ ] **Step 5: Run the server tests to verify they pass**
+- [x] **Step 5: Run the server tests to verify they pass**
 
 Run: `node --test test/staticWebServer.test.js`
 Expected: PASS
@@ -325,16 +324,15 @@ Expected: PASS
 If the task only changed files owned by this task:
 
 ```bash
-git add lib/StaticWebServer.js lib/LocalServer.js lib/core/configuration.js test/staticWebServer.test.js
+git add lib/StaticWebServer.js lib/LocalServer.js test/staticWebServer.test.js
 git commit -m "feat: serve fallback local report api"
 ```
 
-If `lib/LocalServer.js` or `lib/core/configuration.js` contain unrelated pre-existing edits, stage only this task's hunks:
+If `lib/LocalServer.js` contains unrelated pre-existing edits, stage only this task's hunks:
 
 ```bash
 git add lib/StaticWebServer.js test/staticWebServer.test.js
 git add -p lib/LocalServer.js
-git add -p lib/core/configuration.js
 git commit -m "feat: serve fallback local report api"
 ```
 
