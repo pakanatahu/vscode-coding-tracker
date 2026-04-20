@@ -31,3 +31,50 @@ test('buildReportSummary normalizes missing repo, branch, and extension labels',
     assert.equal(summary.byBranch[0].key, 'No branch');
     assert.equal(summary.byExtension[0].key, 'No extension');
 });
+
+test('buildReportSummary produces a 24h chart for reading writing and terminal', () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const base = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHour, 0, 0, 0).getTime();
+    const summary = buildReportSummary([
+        { type: 'open', time: base, long: 30 * 60 * 1000, file: 'a.ts', vcs_repo: 'repo', vcs_branch: 'main' },
+        { type: 'code', time: base, long: 20 * 60 * 1000, file: 'a.ts', vcs_repo: 'repo', vcs_branch: 'main' },
+        { type: 'terminal', time: base, long: 10 * 60 * 1000, file: '', vcs_repo: 'repo', vcs_branch: 'main' }
+    ]);
+
+    assert.equal(summary.chart24h.labels.length, 24);
+    assert.equal(summary.chart24h.series.length, 3);
+    assert.equal(summary.chart24h.series[0].label, 'Reading');
+    assert.equal(summary.chart24h.series[1].label, 'Writing');
+    assert.equal(summary.chart24h.series[2].label, 'Terminal');
+    assert.equal(summary.chart24h.series[0].values[currentHour], 30 * 60 * 1000);
+    assert.equal(summary.chart24h.series[1].values[currentHour], 20 * 60 * 1000);
+    assert.equal(summary.chart24h.series[2].values[currentHour], 10 * 60 * 1000);
+    assert.equal(summary.chart24h.maxHours, 1);
+});
+
+test('buildReportSummary keeps a small but visible 24h scale for short local sessions', () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const base = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHour, 0, 0, 0).getTime();
+    const summary = buildReportSummary([
+        { type: 'open', time: base, long: 39 * 1000, file: 'a.ts', vcs_repo: 'repo', vcs_branch: 'main' },
+        { type: 'code', time: base, long: 20 * 1000, file: 'a.ts', vcs_repo: 'repo', vcs_branch: 'main' },
+        { type: 'terminal', time: base, long: 9 * 1000, file: '', vcs_repo: 'repo', vcs_branch: 'main' }
+    ]);
+
+    assert.equal(summary.chart24h.maxHours, 0.25);
+});
+
+test('buildReportSummary exposes desktop-style last 24 hours chart metadata', () => {
+    const now = new Date();
+    const base = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0).getTime();
+    const summary = buildReportSummary([
+        { type: 'open', time: base, long: 30 * 60 * 1000, file: 'a.ts', vcs_repo: 'repo', vcs_branch: 'main' },
+        { type: 'code', time: base, long: 20 * 60 * 1000, file: 'a.ts', vcs_repo: 'repo', vcs_branch: 'main' }
+    ]);
+
+    assert.equal(summary.chart24h.title, 'Last 24 hours');
+    assert.deepEqual(summary.chart24h.breakdownOptions, ['Activities']);
+    assert.equal(summary.chart24h.axisUnit, 'Minutes');
+});
