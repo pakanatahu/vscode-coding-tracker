@@ -391,7 +391,7 @@ Expected: PASS
 Run: `npm run bundle`
 Expected: PASS with updated `dist/extension.js`
 
-- [ ] **Step 5: Commit the task-specific changes**
+- [x] **Step 5: Commit the task-specific changes**
 
 ```bash
 git add package.json CHANGELOG.md test/commandSurface.test.js
@@ -420,17 +420,17 @@ git commit -m "docs: finalize slashcoded command cleanup"
 - Review: `CHANGELOG.md`
 - Review: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Run the focused test suite**
+- [x] **Step 1: Run the focused test suite**
 
 Run: `node --test test/commandSurface.test.js test/staticWebServer.test.js test/localReportAggregator.test.js`
 Expected: PASS
 
-- [ ] **Step 2: Run the broader node test suite**
+- [x] **Step 2: Run the broader node test suite**
 
 Run: `npm run test:node`
 Expected: PASS
 
-- [ ] **Step 3: Run bundle verification**
+- [x] **Step 3: Run bundle verification**
 
 Run: `npm run bundle`
 Expected: PASS
@@ -447,6 +447,8 @@ SlashCoded: Show Output Channel
 ```
 
 Also verify that removed commands such as `CodingTracker: AFK Toggle` and `CodingTracker: Set Upload Token` no longer appear.
+
+Status: Not run in this shell session. Automated verification and command-surface tests passed, but the Extension Development Host palette still needs a manual spot check.
 
 - [ ] **Step 5: Commit any final verification-only doc/test tweaks**
 
