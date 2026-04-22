@@ -1,7 +1,7 @@
 {
 	"name": "vscode-coding-tracker-fork",
 	"displayName": "Slashcoded Coding tracker",
-	"description": "Integrates VS Code with the SlashCoded desktop app (lundholm.io/project/slashcoded) to track coding time, file edits, terminal sessions, AI chats, AFK, and sync status via useful commands like show report, start/stop local server, flush uploads, and set the upload token.",
+	"description": "Integrates VS Code with the SlashCoded desktop app (lundholm.io/project/slashcoded) to track coding time, file edits, terminal sessions, AI chats, AFK, and sync status through the local report, sync status, history import, and output commands.",
 	"version": "0.10.4",
 	"type": "commonjs",
 	"license": "GPL-3.0",

@@ -340,7 +340,7 @@ In `lib/extensionMain.js`:
 Run: `node --test test/commandSurface.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit the task-specific changes**
+- [x] **Step 5: Commit the task-specific changes**
 
 ```bash
 git add lib/extensionMain.js README.md test/commandSurface.test.js
@@ -362,18 +362,18 @@ git commit -m "docs: align slashcoded sync workflows"
 - Modify: `CHANGELOG.md`
 - Test: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Add a failing metadata/docs test**
+- [x] **Step 1: Add a failing metadata/docs test**
 
 Add assertions that:
 - `package.json` contributed command categories use `SlashCoded`
 - `CHANGELOG.md` no longer documents removed command names as current commands
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test test/commandSurface.test.js`
 Expected: FAIL because changelog and metadata still mention old command branding.
 
-- [ ] **Step 3: Update metadata and release notes**
+- [x] **Step 3: Update metadata and release notes**
 
 In `package.json`:
 - Keep the reduced command set.
@@ -383,7 +383,7 @@ In `CHANGELOG.md`:
 - Rewrite recent entries so they mention the current `SlashCoded:` names and reduced command surface.
 - Avoid implying removed commands are still part of the supported UX.
 
-- [ ] **Step 4: Run tests and bundle verification**
+- [x] **Step 4: Run tests and bundle verification**
 
 Run: `node --test test/commandSurface.test.js test/staticWebServer.test.js test/localReportAggregator.test.js`
 Expected: PASS

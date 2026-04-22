@@ -114,3 +114,17 @@ test('sync status workflow and README avoid removed command labels', () => {
         );
     }
 });
+
+test('package metadata and changelog reflect the reduced SlashCoded command surface', () => {
+    const pkg = readJson('package.json');
+    const changelog = readText('CHANGELOG.md');
+
+    assert.equal(pkg.description.includes('start/stop local server'), false);
+    assert.equal(pkg.description.includes('flush uploads'), false);
+    assert.equal(pkg.description.includes('set the upload token'), false);
+
+    assert.match(changelog, /SlashCoded: Show Local Report/);
+    assert.match(changelog, /SlashCoded: Import Local History into Desktop/);
+    assert.equal(changelog.includes('CodingTracker: Show Report'), false);
+    assert.equal(changelog.includes('CodingTracker: Queue Local History for Desktop Ingestion'), false);
+});
