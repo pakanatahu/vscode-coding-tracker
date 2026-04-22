@@ -32,13 +32,10 @@ All part of this extension(included server program, documents) are open-source a
 
 ## Useful commands
 
-- `CodingTracker: Show Report` to open Slashcoded Desktop when available, otherwise the built-in local summary
-- `CodingTracker: Start Local Server` / `Stop Local Server` to control the ingest service
-- `CodingTracker: Queue Local History for Desktop Ingestion` to move local-only fallback history into the upload queue before or after installing Slashcoded Desktop
-- `CodingTracker: Flush Upload Queue` to retry stalled uploads
-- `CodingTracker: Toggle state logging` to write mode transition details to the Coding Tracker output channel
-- `CodingTracker: Set Upload Token` to rotate credentials securely
-- `CodingTracker: Re-discover Desktop App` and `CodingTracker: Show Sync Status` for maintaining the SlashCoded bridge
+- `SlashCoded: Show Local Report` to open the built-in local summary dashboard
+- `SlashCoded: Show Sync Status` to inspect Desktop connectivity, queue depth, and maintenance actions
+- `SlashCoded: Import Local History into Desktop` to move local-only fallback history into the upload queue before or after installing Slashcoded Desktop
+- `SlashCoded: Show Output Channel` to open the extension log/output stream
 
 ### Manually flush the upload queue
 
