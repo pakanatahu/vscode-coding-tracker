@@ -88,3 +88,29 @@ test('active runtime user-facing copy uses SlashCoded branding', () => {
         );
     }
 });
+
+test('sync status workflow and README avoid removed command labels', () => {
+    const extensionMain = readText('lib/extensionMain.js');
+    const readme = readText('README.md');
+
+    assert.match(extensionMain, /Queue local history for Desktop ingestion/);
+    assert.match(extensionMain, /Force upload queued events now/);
+    assert.match(extensionMain, /Re-discover Desktop App/);
+    assert.match(extensionMain, /placeHolder: 'SlashCoded sync status'/);
+
+    const removedLabels = [
+        'CodingTracker: Show Report',
+        'CodingTracker: Start Local Server',
+        'CodingTracker: Flush Upload Queue',
+        'CodingTracker: Set Upload Token',
+        'CodingTracker: Re-discover Desktop App'
+    ];
+
+    for (const label of removedLabels) {
+        assert.equal(
+            readme.includes(label),
+            false,
+            `expected README to stop documenting removed command ${label}`
+        );
+    }
+});

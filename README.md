@@ -42,7 +42,7 @@ All part of this extension(included server program, documents) are open-source a
 If uploads get stuck and you see a growing number next to the status bar label (for example, "SlashCoded < 39"), you can force a retry:
 
 - Click the status bar item to flush pending uploads, or
-- Run the command: "CodingTracker: Flush Upload Queue"
+- Run `SlashCoded: Show Sync Status` and choose `Force upload queued events now`
 
 The flush will also recover from a stuck request if it has exceeded the timeout, by restarting the upload cycle.
 
@@ -71,11 +71,10 @@ Install from VSIX:
 ## Quick start
 
 1. Install the extension (Marketplace or VSIX)
-2. Run `CodingTracker: Set Upload Token` and paste your secure token
-3. If Slashcoded Desktop is installed, start it so the extension can discover the local API automatically
-4. If Slashcoded Desktop is not installed, the extension stores events locally and `CodingTracker: Show Report` opens the built-in local summary UI
-5. When you later want Slashcoded Desktop to ingest that local-only history, run `CodingTracker: Queue Local History for Desktop Ingestion`
-6. Use `CodingTracker: Show Sync Status` to confirm whether Desktop was discovered and `CodingTracker: Show Report` to open the relevant report
+2. If Slashcoded Desktop is installed, start it so the extension can discover the local API automatically
+3. If Slashcoded Desktop is not installed, the extension stores events locally and `SlashCoded: Show Local Report` opens the built-in local summary UI
+4. When you later want Slashcoded Desktop to ingest that local-only history, run `SlashCoded: Import Local History into Desktop`
+5. Use `SlashCoded: Show Sync Status` to confirm whether Desktop was discovered
 
 ## Configuration
 
@@ -94,19 +93,19 @@ Settings (Preferences → Settings → Coding Tracker):
 1. Download the Windows installer from lundholm.io/project/slashcoded (look for the VS Code integration bundle).
 2. Run the installer, sign in or create an account, and let the app install the local ingest service.
 3. Start the desktop app before launching VS Code so the extension discovers it automatically.
-4. Use `CodingTracker: Show Sync Status` or `CodingTracker: Re-discover Desktop App` if the desktop client launches after VS Code.
+4. Use `SlashCoded: Show Sync Status` if the desktop client launches after VS Code and you want to confirm discovery or trigger maintenance actions.
 
 Once installed, the desktop app exposes the same local endpoint the extension uses, keeps richer history, and surfaces your stats inside SlashCoded’s dashboard.
 
 ### View your report
 
-Run `CodingTracker: Show Report` to open the Desktop-hosted report when Slashcoded Desktop is online. If Desktop is not installed or not detected, the extension falls back to a minimal local summary generated from the raw locally stored event history on your machine.
+Run `SlashCoded: Show Local Report` to open the built-in local report generated from the raw locally stored event history on your machine.
 
 The fallback report is intentionally lightweight, but it now uses a desktop-style dashboard layout instead of a plain stacked summary page. Its `Last 24 hours` chart is rendered with the same Chart.js visual grammar used by Slashcoded's shared area chart, and the surrounding quick stats and grouped panels are composed to feel closer to the main desktop dashboard.
 
 The fallback dashboard still focuses on the data the extension truly has locally: grouped totals by activity, repository, branch, and file extension. For richer history and more advanced analytics, use the Slashcoded Desktop download link shown in that fallback UI.
 
-When Desktop is unavailable, live events stay in the local history file and are not added to the upload queue automatically. When you are ready to hand that history off to Slashcoded Desktop, run `CodingTracker: Queue Local History for Desktop Ingestion`. That command moves the current local-only backlog into `queue.json`, after which the Desktop uploader can drain it normally.
+When Desktop is unavailable, live events stay in the local history file and are not added to the upload queue automatically. When you are ready to hand that history off to Slashcoded Desktop, run `SlashCoded: Import Local History into Desktop`. That command moves the current local-only backlog into `queue.json`, after which the Desktop uploader can drain it normally.
 
 ## Contributing
 

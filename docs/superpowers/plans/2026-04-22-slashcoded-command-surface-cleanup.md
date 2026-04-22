@@ -270,7 +270,7 @@ Keep internal config keys like `codingTracker.uploadToken` unchanged.
 Run: `node --test test/commandSurface.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit the task-specific changes**
+- [x] **Step 5: Commit the task-specific changes**
 
 ```bash
 git add lib/LocalServer.js lib/extensionMain.js lib/commands/auth.js lib/Uploader.js lib/core/configuration.js lib/tracking/afkMonitor.js test/commandSurface.test.js
@@ -297,7 +297,7 @@ git commit -m "refactor: rename runtime copy to slashcoded"
 - Modify: `README.md`
 - Test: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Add a failing test for sync-status option text**
+- [x] **Step 1: Add a failing test for sync-status option text**
 
 Assert that the sync-status quick pick keeps only the retained user workflow language:
 
@@ -311,12 +311,12 @@ Assert that the sync-status quick pick keeps only the retained user workflow lan
 
 and that there are no references to removed command names in the user documentation.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test test/commandSurface.test.js`
 Expected: FAIL if README or sync-status text still references removed command labels.
 
-- [ ] **Step 3: Rewrite documentation and in-app wording around the reduced surface**
+- [x] **Step 3: Rewrite documentation and in-app wording around the reduced surface**
 
 In `README.md`:
 - Replace references to removed commands like:
@@ -335,7 +335,7 @@ In `lib/extensionMain.js`:
 - Keep internal maintenance actions inside sync status.
 - Ensure the quick-pick title/labels use `SlashCoded` voice where appropriate.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `node --test test/commandSurface.test.js`
 Expected: PASS
