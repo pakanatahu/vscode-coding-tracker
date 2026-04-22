@@ -80,7 +80,7 @@ Install from VSIX:
 
 Settings (Preferences → Settings → Coding Tracker):
 
-- codingTracker.uploadToken: no longer needed in settings; set via “Set Upload Token” command (Secret Storage)
+- codingTracker.uploadToken: optional legacy/manual token field; most users should rely on Slashcoded Desktop discovery instead
 - codingTracker.computerId: optional identifier for your machine
 - codingTracker.showStatus: toggle the status bar item
 - codingTracker.proxy: “auto”, “no-proxy”, false, or host:port (for uploads)
