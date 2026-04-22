@@ -68,3 +68,23 @@ test('active runtime modules do not register removed standalone commands', () =>
         );
     }
 });
+
+test('active runtime user-facing copy uses SlashCoded branding', () => {
+    const files = [
+        'lib/LocalServer.js',
+        'lib/extensionMain.js',
+        'lib/commands/auth.js',
+        'lib/Uploader.js',
+        'lib/core/configuration.js',
+        'lib/tracking/afkMonitor.js'
+    ];
+
+    for (const relativePath of files) {
+        const source = readText(relativePath);
+        assert.equal(
+            source.includes('CodingTracker:'),
+            false,
+            `expected ${relativePath} to avoid CodingTracker-prefixed user-facing copy`
+        );
+    }
+});

@@ -200,7 +200,7 @@ In `lib/tracking/afkMonitor.js`:
 Run: `node --test test/commandSurface.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit the task-specific changes**
+- [x] **Step 5: Commit the task-specific changes**
 
 ```bash
 git add lib/LocalServer.js lib/extensionMain.js lib/tracking/afkMonitor.js test/commandSurface.test.js
@@ -228,7 +228,7 @@ git commit -m "refactor: remove dead standalone slashcoded commands"
 - Modify: `lib/tracking/afkMonitor.js`
 - Test: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Add a failing copy-safety test**
+- [x] **Step 1: Add a failing copy-safety test**
 
 Extend `test/commandSurface.test.js` with focused text checks for user-facing strings that must now use `SlashCoded`, for example:
 
@@ -238,12 +238,12 @@ assert.equal(source.includes('CodingTracker:'), false);
 
 Do this narrowly for the active runtime files above, not for legacy files such as `lib/extensionLegacy.js`.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test test/commandSurface.test.js`
 Expected: FAIL because active runtime modules still contain `CodingTracker:` strings.
 
-- [ ] **Step 3: Replace visible runtime copy**
+- [x] **Step 3: Replace visible runtime copy**
 
 Update active user-facing prompts/toasts/errors such as:
 
@@ -265,7 +265,7 @@ Update active user-facing prompts/toasts/errors such as:
 
 Keep internal config keys like `codingTracker.uploadToken` unchanged.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `node --test test/commandSurface.test.js`
 Expected: PASS
