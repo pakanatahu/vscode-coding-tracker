@@ -118,7 +118,7 @@ Update the README command overview to match this exact visible set.
 Run: `node --test test/commandSurface.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit the task-specific changes**
+- [x] **Step 5: Commit the task-specific changes**
 
 If these files only contain task-owned changes:
 
@@ -143,7 +143,7 @@ git commit -m "test: lock slashcoded command surface"
 - Modify: `lib/tracking/afkMonitor.js`
 - Test: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Extend the failing test to assert removed commands are not registered**
+- [x] **Step 1: Extend the failing test to assert removed commands are not registered**
 
 Add expectations that these standalone commands are no longer registered during activation logic review:
 
@@ -164,12 +164,12 @@ Add expectations that these standalone commands are no longer registered during 
 
 Structure the test around source inspection or an extracted pure helper if needed; do not build a heavyweight VS Code integration harness.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test test/commandSurface.test.js`
 Expected: FAIL because those commands are still registered in code.
 
-- [ ] **Step 3: Remove dead standalone registrations while keeping needed behavior**
+- [x] **Step 3: Remove dead standalone registrations while keeping needed behavior**
 
 In `lib/LocalServer.js`:
 - Remove registration of:
@@ -195,7 +195,7 @@ In `lib/tracking/afkMonitor.js`:
 - Remove registration of the three AFK commands entirely.
 - Keep AFK config application behavior, since the setting still exists.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `node --test test/commandSurface.test.js`
 Expected: PASS

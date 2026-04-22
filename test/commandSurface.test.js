@@ -39,3 +39,32 @@ test('README command overview lists only the approved SlashCoded commands', () =
     assert.match(readme, /SlashCoded: Import Local History into Desktop/);
     assert.match(readme, /SlashCoded: Show Output Channel/);
 });
+
+test('active runtime modules do not register removed standalone commands', () => {
+    const sources = [
+        readText('lib/LocalServer.js'),
+        readText('lib/extensionMain.js'),
+        readText('lib/tracking/afkMonitor.js')
+    ].join('\n');
+
+    const removedCommands = [
+        'codingTracker.showReport',
+        'codingTracker.startLocalServer',
+        'codingTracker.stopLocalServer',
+        'codingTracker.githubAuth',
+        'codingTracker.flushUploads',
+        'codingTracker.rediscoverDesktop',
+        'codingTracker.setUploadToken',
+        'codingTracker.afkEnable',
+        'codingTracker.afkDisable',
+        'codingTracker.afkToggle'
+    ];
+
+    for (const commandId of removedCommands) {
+        assert.doesNotMatch(
+            sources,
+            new RegExp(`registerCommand\\('${commandId.replaceAll('.', '\\.')}`),
+            `expected removed command ${commandId} to stay unregistered`
+        );
+    }
+});
