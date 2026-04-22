@@ -450,7 +450,7 @@ Also verify that removed commands such as `CodingTracker: AFK Toggle` and `Codin
 
 Status: Not run in this shell session. Automated verification and command-surface tests passed, but the Extension Development Host palette still needs a manual spot check.
 
-- [ ] **Step 5: Commit any final verification-only doc/test tweaks**
+- [x] **Step 5: Commit any final verification-only doc/test tweaks**
 
 If no further file changes were needed, skip committing.
 
