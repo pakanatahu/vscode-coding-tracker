@@ -15205,6 +15205,7 @@ var require_StaticWebServer = __commonJS({
       const staticDir = options.staticDir;
       const port = options.port;
       const debugLog = options.debugLog;
+      const chartVendorFile = path.join(__dirname, "..", "node_modules", "chart.js", "dist", "chart.umd.js");
       const getReportSummary = typeof options.getReportSummary === "function" ? options.getReportSummary : async () => ({ totals: { totalMs: 0, eventCount: 0, rangeStart: null, rangeEnd: null }, byActivity: [], byRepo: [], byBranch: [], byExtension: [] });
       const server = http.createServer(async (req, res) => {
         try {
@@ -15232,6 +15233,9 @@ var require_StaticWebServer = __commonJS({
             res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
             res.end(JSON.stringify(summary));
             return;
+          }
+          if (p === "/vendor/chart.js/chart.umd.js") {
+            return streamFile(chartVendorFile, res);
           }
           if (p === "/report" || p === "/report/") {
             const file = path.join(staticDir, "index.html");
@@ -15356,10 +15360,21 @@ var require_historyStore = __commonJS({
         const records = await readAll();
         return records.filter((record) => Number(record.long) > 0 && Number(record.time) > 0);
       }
+      async function clear() {
+        if (!fs.existsSync(historyFilePath)) return;
+        await fs.promises.rm(historyFilePath, { force: true });
+      }
+      async function takeReportEvents() {
+        const records = await readReportEvents();
+        await clear();
+        return records;
+      }
       return {
         appendMany,
         readAll,
         readReportEvents,
+        clear,
+        takeReportEvents,
         historyFilePath
       };
     }
@@ -15378,6 +15393,7 @@ var require_reportAggregator = __commonJS({
       const filteredEvents = safeEvents.filter((event) => Number(event.long) > 0);
       const datedEvents = filteredEvents.filter((event) => Number(event.time) > 0);
       const times = datedEvents.map((event) => Number(event.time));
+      const chart24h = build24HourChart(filteredEvents);
       return {
         totals: {
           totalMs: sum(filteredEvents, (event) => Number(event.long) || 0),
@@ -15385,6 +15401,7 @@ var require_reportAggregator = __commonJS({
           rangeStart: times.length ? Math.min(...times) : null,
           rangeEnd: times.length ? Math.max(...times.map((time, index) => time + (Number(datedEvents[index].long) || 0))) : null
         },
+        chart24h,
         byActivity: toGroups(filteredEvents, (event) => normalizeActivity(event.type)),
         byRepo: toGroups(filteredEvents, (event) => normalizeRepo(event.vcs_repo)),
         byBranch: toGroups(filteredEvents, (event) => normalizeBranch(event.vcs_branch)),
@@ -15393,6 +15410,62 @@ var require_reportAggregator = __commonJS({
           (event) => extractExtension(event.file)
         )
       };
+    }
+    function build24HourChart(events) {
+      const now = /* @__PURE__ */ new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const endOfDay = startOfDay + 24 * 60 * 60 * 1e3;
+      const hourMs = 60 * 60 * 1e3;
+      const labels = Array.from({ length: 24 }, (_, hour) => `${String(hour).padStart(2, "0")}:00`);
+      const reading = new Array(24).fill(0);
+      const writing = new Array(24).fill(0);
+      const terminal = new Array(24).fill(0);
+      for (const event of events) {
+        const bucket = toChartBucket(event.type);
+        if (!bucket) continue;
+        const eventStart = Number(event.time) || 0;
+        const duration = Number(event.long) || 0;
+        if (eventStart <= 0 || duration <= 0) continue;
+        const eventEnd = eventStart + duration;
+        const overlapStart = Math.max(eventStart, startOfDay);
+        const overlapEnd = Math.min(eventEnd, endOfDay);
+        if (overlapEnd <= overlapStart) continue;
+        for (let hour = 0; hour < 24; hour += 1) {
+          const slotStart = startOfDay + hour * hourMs;
+          const slotEnd = slotStart + hourMs;
+          const coveredMs = Math.max(0, Math.min(overlapEnd, slotEnd) - Math.max(overlapStart, slotStart));
+          if (!coveredMs) continue;
+          if (bucket === "reading") reading[hour] += coveredMs;
+          if (bucket === "writing") writing[hour] += coveredMs;
+          if (bucket === "terminal") terminal[hour] += coveredMs;
+        }
+      }
+      const peakHours = Math.max(
+        ...reading.map((_, index) => (reading[index] + writing[index] + terminal[index]) / hourMs),
+        0
+      );
+      const maxHours = peakHours > 0 ? Math.max(0.25, Math.ceil(peakHours * 4) / 4) : 1;
+      return {
+        title: "Last 24 hours",
+        breakdownLabel: "Break down by",
+        breakdownOptions: ["Activities"],
+        activeBreakdown: "Activities",
+        axisUnit: "Minutes",
+        labels,
+        currentTimeLabel: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
+        maxHours,
+        series: [
+          { key: "reading", label: "Reading", totalMs: sum(reading, (value) => value), values: reading, color: "#50c2ff" },
+          { key: "writing", label: "Writing", totalMs: sum(writing, (value) => value), values: writing, color: "#7a5cff" },
+          { key: "terminal", label: "Terminal", totalMs: sum(terminal, (value) => value), values: terminal, color: "#c46cff" }
+        ]
+      };
+    }
+    function toChartBucket(type) {
+      if (type === "open") return "reading";
+      if (type === "code") return "writing";
+      if (type === "terminal") return "terminal";
+      return "";
     }
     function sum(items, selector) {
       return items.reduce((total, item) => total + (Number(selector(item)) || 0), 0);
@@ -16072,11 +16145,9 @@ var require_LocalServer = __commonJS({
     function init(extensionContext) {
       var { subscriptions } = extensionContext;
       storagePath = extensionContext && extensionContext.globalStorageUri ? extensionContext.globalStorageUri.fsPath : "";
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.showReport", showReport));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.startLocalServer", () => startLocalServer()));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.stopLocalServer", () => stopLocalServer()));
+      subscriptions.push(vscode.commands.registerCommand("codingTracker.showLocalReport", showLocalReport));
       try {
-        log.debug("[LocalServer] Commands registered: showReport, startLocalServer, stopLocalServer");
+        log.debug("[LocalServer] Commands registered: showLocalReport");
       } catch (_) {
       }
       userConfig = _readUserConfig();
@@ -16125,7 +16196,7 @@ var require_LocalServer = __commonJS({
         }
         log.debug(`[ConfigChanged]: please reload vscode to apply it.`);
         shouldToastReloadVSCode && vscode.window.showInformationMessage(
-          `CodingTracker: detected your local server configurations changed. Please reload VSCode to apply.`
+          `SlashCoded: detected your local server configurations changed. Please reload VSCode to apply.`
         );
       }
       userConfig = newConfig;
@@ -16137,7 +16208,7 @@ var require_LocalServer = __commonJS({
         if (builtinServer) {
           isLocalServerRunningInThisContext = true;
           statusBar.localServer.turnOn();
-          if (!silent) vscode.window.showInformationMessage(`CodingTracker: built-in local server started!`);
+          if (!silent) vscode.window.showInformationMessage(`SlashCoded: built-in local server started!`);
           return;
         }
         const port = Number(_getPortInfoFromURL(userConfig.url));
@@ -16158,7 +16229,7 @@ var require_LocalServer = __commonJS({
         });
         isLocalServerRunningInThisContext = true;
         statusBar.localServer.turnOn();
-        vscode.window.showInformationMessage(`CodingTracker: built-in local server started!`);
+        vscode.window.showInformationMessage(`SlashCoded: built-in local server started!`);
         return;
       }
       let cwd = EXECUTE_CWD;
@@ -16220,7 +16291,7 @@ var require_LocalServer = __commonJS({
             /** @type {{localServerMode?: boolean}} */
             result.localServerMode
           ) {
-            silent || vscode.window.showInformationMessage(`CodingTracker: local server started!`);
+            silent || vscode.window.showInformationMessage(`SlashCoded: local server started!`);
             isActiveCheck ? log.debug(`[Heartbeat]: server in local!`) : log.debug(`[Launched]: Local server has launching!`);
             statusBar.localServer.turnOn();
           } else {
@@ -16232,47 +16303,6 @@ var require_LocalServer = __commonJS({
           setTimeout(() => _checkIsLocalServerStart(silent, times + 1, isActiveCheck), 800);
         }
       });
-    }
-    function stopLocalServer() {
-      isStopping = true;
-      if (builtinServer) {
-        try {
-          builtinServer.close();
-        } catch (_) {
-        }
-        builtinServer = null;
-        isLocalServerRunningInThisContext = false;
-        statusBar.localServer.turnOff();
-        vscode.window.showInformationMessage(`CodingTracker: local server stopped!`);
-        return;
-      }
-      log.debug(`[Kill]: try to kill local server...`);
-      axios.get(_getKillURL(), { params: { token: userConfig.token } }).then(
-        /** @param {import('axios').AxiosResponse<any>} res */
-        (res) => {
-          var result = {};
-          try {
-            result = res && res.data ? res.data : {};
-          } catch (e) {
-            log.error("[Error]: parse JSON failed!");
-          }
-          if (result.success) {
-            statusBar.localServer.turnOff();
-            log.debug(`[Killed]: killed local server!`);
-            vscode.window.showInformationMessage(`CodingTracker: local server stopped!`);
-          } else {
-            log.debug(`[Response]: ${JSON.stringify(result)}`);
-            if (!isStopping) {
-              (result.error || "").indexOf("local") >= 0 ? _showError(`stop failed!(because this server is not a local server)`, { stack: "Not a local server!" }) : _showError(`stop failed!(because your token is invalid)`, { stack: "token is invalid" });
-            }
-          }
-        }
-      ).catch(
-        /** @param {any} err */
-        (err) => {
-          if (!isStopping) _showError(`kill failed, because could not connect local server`, err);
-        }
-      );
     }
     function stopLocalServerSilentByTreeKill() {
       isStopping = true;
@@ -16288,24 +16318,14 @@ var require_LocalServer = __commonJS({
         require_tree_kill()(serverChildProcess.pid);
       serverChildProcess = null;
     }
-    async function showReport() {
+    async function showLocalReport() {
       try {
-        const uploader = require_Uploader();
-        const status = uploader && uploader.getStatusSnapshot ? uploader.getStatusSnapshot() : null;
-        const desktopUrl = getDesktopReportURL(status);
-        if (desktopUrl) {
-          await vscode.env.openExternal(vscode.Uri.parse(desktopUrl));
-          return;
-        }
         startLocalServer(true);
-        if (builtinServer && builtinServer.url) {
-          await vscode.env.openExternal(vscode.Uri.parse(`${builtinServer.url}/report/`));
-          return;
-        }
-        exec(_getOpenReportCommand(), (err) => err && _showError(`Execute open report command error!`, err));
+        const fallbackUrl = getBuiltinReportURL();
+        await vscode.env.openExternal(vscode.Uri.parse(fallbackUrl));
       } catch (err) {
         _showError(
-          `Execute open report command error!`,
+          `Execute open local report command error!`,
           /** @type {{stack?:any}} */
           err || { stack: "Unknown error" }
         );
@@ -16328,29 +16348,12 @@ var require_LocalServer = __commonJS({
         (err) => then(err)
       );
     }
-    function _getOpenReportCommand() {
-      const url = _getReportURL();
-      switch (process.platform) {
-        case "win32":
-          return `start "" "${url}"`;
-        case "darwin":
-          return `open "${url}"`;
-        default:
-          return `xdg-open "${url}"`;
-      }
-    }
-    function _getReportURL() {
-      return `${userConfig.url}/report/` + (userConfig.token ? `?token=${userConfig.token}` : ``);
-    }
-    function getDesktopReportURL(status) {
+    function getBuiltinReportURL() {
       try {
-        const discovery = status && status.discovery ? status.discovery : null;
-        const base = discovery && (discovery.publicBaseUrl || discovery.apiBaseUrl);
-        if (!base) return "";
-        return `${String(base).replace(/\/api\/?$/i, "").replace(/\/$/, "")}/report/`;
+        if (builtinServer && builtinServer.url) return `${String(builtinServer.url).replace(/\/$/, "")}/report/`;
       } catch (_) {
-        return "";
       }
+      return `http://127.0.0.1:${DEFAULT_PORT}/report/`;
     }
     function _getWelcomeURL() {
       return `${userConfig.url}/`;
@@ -16381,7 +16384,7 @@ var require_LocalServer = __commonJS({
       const MENU_ITEM_TEXT = "Show details";
       log.error(`[Error]: ${errOneLine}
 ${errObject.stack}`);
-      vscode.window.showErrorMessage(`CodingTracker: ${errOneLine}`, MENU_ITEM_TEXT).then((item) => item == MENU_ITEM_TEXT ? log.show() : 0);
+      vscode.window.showErrorMessage(`SlashCoded: ${errOneLine}`, MENU_ITEM_TEXT).then((item) => item == MENU_ITEM_TEXT ? log.show() : 0);
     }
     function _getLaunchParameters() {
       var ps = [];
@@ -16416,6 +16419,22 @@ ${errObject.stack}`);
         return false;
       },
       dispose: stopLocalServerSilentByTreeKill
+    };
+  }
+});
+
+// lib/localReport/storageMode.js
+var require_storageMode = __commonJS({
+  "lib/localReport/storageMode.js"(exports2, module2) {
+    function shouldQueueLiveEvents(input) {
+      if (input && input.forceLocalFallback) return false;
+      const connectionMode = input && input.connectionMode ? input.connectionMode : "desktop";
+      if (connectionMode !== "desktop") return true;
+      const discovery = input && input.discovery ? input.discovery : null;
+      return !!(discovery && (discovery.apiBaseUrl || discovery.publicBaseUrl));
+    }
+    module2.exports = {
+      shouldQueueLiveEvents
     };
   }
 });
@@ -16536,7 +16555,7 @@ var require_package = __commonJS({
     module2.exports = {
       name: "vscode-coding-tracker-fork",
       displayName: "Slashcoded Coding tracker",
-      description: "Integrates VS Code with the SlashCoded desktop app (lundholm.io/project/slashcoded) to track coding time, file edits, terminal sessions, AI chats, AFK, and sync status via useful commands like show report, start/stop local server, flush uploads, and set the upload token.",
+      description: "Integrates VS Code with the SlashCoded desktop app (lundholm.io/project/slashcoded) to track coding time, file edits, terminal sessions, AI chats, AFK, and sync status through the local report, sync status, history import, and output commands.",
       version: "0.10.4",
       type: "commonjs",
       license: "GPL-3.0",
@@ -16560,6 +16579,7 @@ var require_package = __commonJS({
       main: "./dist/extension.js",
       dependencies: {
         axios: "^1.7.7",
+        "chart.js": "^4.5.1",
         "tree-kill": "^1.2.2",
         uuid: "^8.3.2",
         "vscode-coding-tracker-server": "^0.6.0"
@@ -16567,9 +16587,9 @@ var require_package = __commonJS({
       devDependencies: {
         "@types/node": "^22",
         "@types/vscode": "*",
-        typescript: "^5.8.3",
         "@vscode/vsce": "^2.22.0",
-        esbuild: "^0.25.10"
+        esbuild: "^0.25.10",
+        typescript: "^5.8.3"
       },
       optionalDependencies: {
         "@typescript-eslint/eslint-plugin": "^5.4.0",
@@ -16583,7 +16603,10 @@ var require_package = __commonJS({
           properties: {
             "codingTracker.connectionMode": {
               type: "string",
-              enum: ["desktop", "cloud"],
+              enum: [
+                "desktop",
+                "cloud"
+              ],
               default: "desktop",
               description: "Connection mode: 'desktop' sends events to the SlashCoded desktop Local API on localhost; 'cloud' sends them to the legacy cloud ingest service."
             },
@@ -16666,69 +16689,34 @@ var require_package = __commonJS({
               type: "number",
               default: 500,
               description: "Timeout in milliseconds for desktop app discovery handshake (default 500)."
+            },
+            "codingTracker.forceLocalFallback": {
+              type: "boolean",
+              default: false,
+              description: "Force local-only fallback storage and report behavior even when Slashcoded Desktop is detected. Useful for testing the built-in local dashboard."
             }
           }
         },
         commands: [
           {
-            command: "codingTracker.showReport",
-            title: "%cmd.showReport%",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.startLocalServer",
-            title: "%cmd.startLocalServer%",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.stopLocalServer",
-            title: "%cmd.stopLocalServer%",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.githubAuth",
-            title: "CodingTracker: GitHub Auth / Refresh Token",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.flushUploads",
-            title: "CodingTracker: Flush Upload Queue",
-            category: "CodingTracker"
+            command: "codingTracker.showLocalReport",
+            title: "SlashCoded: Show Local Report",
+            category: "SlashCoded"
           },
           {
             command: "codingTracker.showSyncStatus",
-            title: "CodingTracker: Show Sync Status",
-            category: "CodingTracker"
+            title: "SlashCoded: Show Sync Status",
+            category: "SlashCoded"
           },
           {
-            command: "codingTracker.rediscoverDesktop",
-            title: "CodingTracker: Re-discover Desktop App",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.setUploadToken",
-            title: "CodingTracker: Set Upload Token",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.afkEnable",
-            title: "CodingTracker: AFK Enable",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.afkDisable",
-            title: "CodingTracker: AFK Disable",
-            category: "CodingTracker"
-          },
-          {
-            command: "codingTracker.afkToggle",
-            title: "CodingTracker: AFK Toggle",
-            category: "CodingTracker"
+            command: "codingTracker.queueLocalHistoryForDesktop",
+            title: "SlashCoded: Import Local History into Desktop",
+            category: "SlashCoded"
           },
           {
             command: "codingTracker.showOutput",
-            title: "CodingTracker: Show Output Channel",
-            category: "CodingTracker"
+            title: "SlashCoded: Show Output Channel",
+            category: "SlashCoded"
           }
         ]
       },
@@ -16747,7 +16735,7 @@ var require_package = __commonJS({
         "test:node": "node --test test/*.test.js",
         "setup-i18n": "node ./utils/setup-i18n.js",
         bundle: "node ./scripts/esbuild.bundle.mjs",
-        package: "npm run bundle && npx @vscode/vsce package"
+        package: "node ./scripts/package-vsix.mjs"
       },
       keywords: [
         "vscode",
@@ -16773,6 +16761,7 @@ var require_Uploader = __commonJS({
     var localServer = require_LocalServer();
     var log = require_Log();
     var { createHistoryStore } = require_historyStore();
+    var { shouldQueueLiveEvents } = require_storageMode();
     var { isDebugMode } = require_Constants();
     var {
       createDefaultTrackingConfig,
@@ -16848,10 +16837,28 @@ var require_Uploader = __commonJS({
     var machineId = "";
     var desktopWarned = false;
     var connectionMode = "desktop";
+    var forceLocalFallback = false;
     var enforcementMode = null;
     var lastEnforcementCheckAt = 0;
     var deadLetterFilePath = "";
     var historyStore = null;
+    function pushQueuePayloads(queuedPayloads, trackingSnapshot) {
+      for (const queuedPayload of queuedPayloads) {
+        log.debug(`new upload object: ${queuedPayload.type};${queuedPayload.time};${queuedPayload.long};${queuedPayload.file}`);
+        Q.push({ payload: queuedPayload, createdAt: Date.now(), retryCount: 0, trackingConfig: trackingSnapshot });
+      }
+      persistQueue();
+      if (!queueWarned && Q.length > QUEUE_WARN_THRESHOLD) {
+        queueWarned = true;
+        try {
+          vscode.window.showWarningMessage(`SlashCoded: Offline queue has ${Q.length} pending events. Desktop app may be offline.`);
+        } catch (_) {
+        }
+      }
+      statusBar.setStatus2GotNew1();
+      updateSyncState();
+      process.nextTick(_upload);
+    }
     function expandPayloadsForQueue(payload, config) {
       if (!payload)
         return [payload];
@@ -16905,7 +16912,7 @@ var require_Uploader = __commonJS({
           if (!queueWarned && Q.length > QUEUE_WARN_THRESHOLD) {
             queueWarned = true;
             try {
-              vscode.window.showWarningMessage(`CodingTracker: Offline queue has ${Q.length} pending events. Desktop app may be offline.`);
+              vscode.window.showWarningMessage(`SlashCoded: Offline queue has ${Q.length} pending events. Desktop app may be offline.`);
             } catch (_) {
             }
           }
@@ -17046,6 +17053,13 @@ var require_Uploader = __commonJS({
           }
         }
       },
+      setForceLocalFallback: function(enabled) {
+        forceLocalFallback = !!enabled;
+        try {
+          log.debug(`uploader forceLocalFallback set to ${forceLocalFallback}`);
+        } catch (_) {
+        }
+      },
       upload: function(data) {
         const payload = data;
         if (!payload)
@@ -17064,30 +17078,21 @@ var require_Uploader = __commonJS({
         if (queuePayloads.length > 1) {
           log.debug(`uploader: split payload into ${queuePayloads.length} shared-timing chunks (${payload.long}ms total)`);
         }
-        const persistedPayloads = queuePayloads.map((queuedPayload) => normalizePayload(queuedPayload));
-        if (historyStore) {
-          historyStore.appendMany(persistedPayloads).catch((error) => {
-            try {
-              log.debug("Failed to persist local history", error);
-            } catch (_) {
-            }
-          });
-        }
-        for (const queuedPayload of queuePayloads) {
-          log.debug(`new upload object: ${queuedPayload.type};${queuedPayload.time};${queuedPayload.long};${queuedPayload.file}`);
-          Q.push({ payload: queuedPayload, createdAt: Date.now(), retryCount: 0, trackingConfig: trackingSnapshot });
-        }
-        persistQueue();
-        if (!queueWarned && Q.length > QUEUE_WARN_THRESHOLD) {
-          queueWarned = true;
-          try {
-            vscode.window.showWarningMessage(`CodingTracker: Offline queue has ${Q.length} pending events. Desktop app may be offline.`);
-          } catch (_) {
+        if (!shouldQueueLiveEvents({ connectionMode, discovery, forceLocalFallback })) {
+          const persistedPayloads = queuePayloads.map((queuedPayload) => normalizePayload(queuedPayload));
+          if (historyStore) {
+            historyStore.appendMany(persistedPayloads).catch((error) => {
+              try {
+                log.debug("Failed to persist local history", error);
+              } catch (_) {
+              }
+            });
           }
+          statusBar.setStatus2Uploaded("Stored locally");
+          updateSyncState("Desktop app not detected; storing locally");
+          return;
         }
-        statusBar.setStatus2GotNew1();
-        updateSyncState();
-        process.nextTick(_upload);
+        pushQueuePayloads(queuePayloads, trackingSnapshot);
       },
       /**
        * Attempt to flush the queue immediately. If an upload appears stuck beyond
@@ -17124,6 +17129,13 @@ var require_Uploader = __commonJS({
        */
       getStatusSnapshot: () => buildStatusSnapshot(),
       getTrackingConfig: () => Object.assign({}, trackingConfig),
+      queueLocalHistoryForDesktop: async () => {
+        if (!historyStore || !historyStore.takeReportEvents) return { importedCount: 0 };
+        const events = await historyStore.takeReportEvents();
+        if (!events.length) return { importedCount: 0 };
+        pushQueuePayloads(events.map((event) => normalizePayload(event)), Object.assign({}, trackingConfig));
+        return { importedCount: events.length };
+      },
       /**
        * Drain queued events immediately (reset backoff).
        */
@@ -17613,7 +17625,7 @@ ${dump}`);
         if (res && res.status === 404) {
           await clearToken("refresh-404");
           try {
-            vscode.window.showWarningMessage("CodingTracker: Desktop token expired. Requesting a new token...");
+            vscode.window.showWarningMessage("SlashCoded: Desktop token expired. Requesting a new token...");
           } catch (_) {
           }
           return "invalid";
@@ -17802,7 +17814,7 @@ ${bodyHash}`;
       }
       await clearToken("auth-failed");
       try {
-        vscode.window.showWarningMessage("CodingTracker: Desktop token invalid or expired. Requesting a new one...");
+        vscode.window.showWarningMessage("SlashCoded: Desktop token invalid or expired. Requesting a new one...");
       } catch (_) {
       }
       await requestNewToken();
@@ -20326,6 +20338,7 @@ var require_configuration = __commonJS({
       const sanitize = (v) => v === void 0 || v === null || v === "undefined" ? "" : String(v);
       const uploadTokenRaw = extensionCfg.get("uploadToken");
       const connectionModeRaw = extensionCfg.get("connectionMode");
+      const forceLocalFallback = extensionCfg.get("forceLocalFallback") === true;
       const computerId = sanitize(extensionCfg.get("computerId"));
       const enableStatusBar = extensionCfg.get("showStatus");
       const mttRaw = extensionCfg.get("moreThinkingTime");
@@ -20351,7 +20364,7 @@ var require_configuration = __commonJS({
             } catch (_) {
             }
             try {
-              vscode.window.showInformationMessage("CodingTracker: Upload token migrated to secure storage.");
+              vscode.window.showInformationMessage("SlashCoded: Upload token migrated to secure storage.");
             } catch (_) {
             }
           }
@@ -20392,6 +20405,11 @@ var require_configuration = __commonJS({
         uploader.setConnectionMode(connectionMode);
       } catch (e) {
         log.debug("Failed to set connectionMode on uploader", e);
+      }
+      try {
+        uploader.setForceLocalFallback(forceLocalFallback);
+      } catch (e) {
+        log.debug("Failed to set forceLocalFallback on uploader", e);
       }
       const timeoutCfgRaw = extensionCfg.get("uploadTimeoutMs");
       if (typeof timeoutCfgRaw === "number") {
@@ -20512,60 +20530,6 @@ var require_wrapGenerators = __commonJS({
       }
     }
     module2.exports = { wrapUploadObjectGenerators };
-  }
-});
-
-// lib/commands/auth.js
-var require_auth = __commonJS({
-  "lib/commands/auth.js"(exports2, module2) {
-    "use strict";
-    var runtime = require_runtime();
-    async function performTokenRefresh(context, vscode, log, isDebugMode) {
-      try {
-        const secrets = context.secrets;
-        const storedRefresh = await secrets.get("codingTracker.refreshToken");
-        if (!storedRefresh) return false;
-        const axios = (
-          /** @type {any} */
-          require_axios()
-        );
-        const resp = await axios.post(`${runtime.AUTH_API_BASE}/api/token/refresh`, { refreshToken: storedRefresh });
-        const uploadToken = resp.data && (resp.data.uploadToken || resp.data.token);
-        if (uploadToken) {
-          await vscode.workspace.getConfiguration("codingTracker").update("uploadToken", uploadToken, vscode.ConfigurationTarget.Global);
-          if (isDebugMode) log.debug("Refreshed upload token via stored refresh token.");
-          return true;
-        }
-        log.debug("Token refresh response missing uploadToken field");
-      } catch (e) {
-        const err = (
-          /** @type {any} */
-          e
-        );
-        if (isDebugMode) log.debug("Token refresh failed: " + (err && err.message ? err.message : err));
-      }
-      return false;
-    }
-    async function githubAuthCommand(context, vscode, log, isDebugMode) {
-      const input = await vscode.window.showInputBox({
-        prompt: "Paste your CodingTracker refresh token (from browser after GitHub auth)",
-        ignoreFocusOut: true,
-        password: true,
-        placeHolder: "refresh-token"
-      });
-      if (!input) {
-        vscode.window.showInformationMessage("GitHub auth cancelled.");
-        return;
-      }
-      await context.secrets.store("codingTracker.refreshToken", input);
-      const ok = await performTokenRefresh(context, vscode, log, isDebugMode);
-      if (ok) vscode.window.showInformationMessage("CodingTracker upload token updated successfully.");
-      else vscode.window.showErrorMessage("Failed to refresh upload token. Check the refresh token and try again.");
-    }
-    module2.exports = {
-      githubAuthCommand,
-      performTokenRefresh
-    };
   }
 });
 
@@ -20952,22 +20916,7 @@ var require_afkMonitor = __commonJS({
         mode.updateModeBasedOnState();
       }
       function registerCommands(subscriptions) {
-        try {
-          const setAfkEnabled = async (enabled) => {
-            await vscode.workspace.getConfiguration("codingTracker").update("afkEnabled", enabled, vscode.ConfigurationTarget.Global);
-            applyConfig(enabled, state.afkTimeoutMs);
-            vscode.window.showInformationMessage(`CodingTracker: AFK ${enabled ? "enabled" : "disabled"}`);
-          };
-          subscriptions.push(vscode.commands.registerCommand("codingTracker.afkEnable", () => setAfkEnabled(true)));
-          subscriptions.push(vscode.commands.registerCommand("codingTracker.afkDisable", () => setAfkEnabled(false)));
-          subscriptions.push(vscode.commands.registerCommand("codingTracker.afkToggle", async () => {
-            const cfg = vscode.workspace.getConfiguration("codingTracker");
-            const cur = cfg.get("afkEnabled") !== false;
-            await setAfkEnabled(!cur);
-          }));
-        } catch (e) {
-          if (isDebugMode) log.debug("[AFK] command registration failed", e);
-        }
+        void subscriptions;
       }
       return {
         recordUserActivity,
@@ -21885,7 +21834,6 @@ var require_extensionMain = __commonJS({
     var modeController = require_modeController();
     var { updateConfigurations } = require_configuration();
     var { wrapUploadObjectGenerators } = require_wrapGenerators();
-    var { githubAuthCommand } = require_auth();
     var { createOpenCodeTracker } = require_OpenCodeTracker();
     var { createAfkMonitor } = require_afkMonitor();
     var { createTerminalTracker } = require_terminalTracker();
@@ -21916,7 +21864,7 @@ var require_extensionMain = __commonJS({
       } catch (_) {
       }
       try {
-        outLog.debug("CodingTracker: activating extension...");
+        outLog.debug("SlashCoded: activating extension...");
       } catch (_) {
       }
       installErrorHooks(log);
@@ -22110,59 +22058,43 @@ var require_extensionMain = __commonJS({
               label: "Token expiry",
               detail: status && status.tokenExpiresAt ? formatTimestamp(status.tokenExpiresAt) : "Not requested"
             },
+            { label: "Queue local history for Desktop ingestion", action: "queue-local-history" },
             { label: "Force upload queued events now", action: "flush" },
             { label: "Re-discover Desktop App", action: "rediscover" }
           ]
         );
-        const pick = await vscode.window.showQuickPick(items, { placeHolder: "Slashcoded sync status" });
+        const pick = await vscode.window.showQuickPick(items, { placeHolder: "SlashCoded sync status" });
         if (!pick) return;
-        if (pick.action === "flush") {
+        if (pick.action === "queue-local-history") {
+          try {
+            const result = await uploader.queueLocalHistoryForDesktop();
+            const importedCount = result && typeof result.importedCount === "number" ? result.importedCount : 0;
+            vscode.window.showInformationMessage(importedCount > 0 ? `SlashCoded: queued ${importedCount} local event${importedCount === 1 ? "" : "s"} for Desktop ingestion.` : "SlashCoded: no local-only history found to queue.");
+          } catch (e) {
+            log.error(e);
+          }
+        } else if (pick.action === "flush") {
           try {
             uploader.forceDrain();
-            vscode.window.showInformationMessage("CodingTracker: Upload queue flush requested.");
+            vscode.window.showInformationMessage("SlashCoded: Upload queue flush requested.");
           } catch (e) {
             log.error(e);
           }
         } else if (pick.action === "rediscover") {
           try {
             await uploader.rediscover();
-            vscode.window.showInformationMessage("CodingTracker: Desktop re-discovery triggered.");
+            vscode.window.showInformationMessage("SlashCoded: Desktop re-discovery triggered.");
           } catch (e) {
             log.error(e);
           }
         }
       };
       subscriptions.push(vscode.commands.registerCommand("codingTracker.showSyncStatus", () => showSyncStatus()));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.rediscoverDesktop", async () => {
+      subscriptions.push(vscode.commands.registerCommand("codingTracker.queueLocalHistoryForDesktop", async () => {
         try {
-          await uploader.rediscover();
-          vscode.window.showInformationMessage("CodingTracker: Desktop re-discovery triggered.");
-        } catch (e) {
-          log.error(e);
-        }
-      }));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.githubAuth", () => githubAuthCommand(context, vscode, log, isDebugMode)));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.setUploadToken", async () => {
-        try {
-          const val = await vscode.window.showInputBox({ prompt: "Enter CodingTracker upload token", password: true, ignoreFocusOut: true });
-          if (!val) return;
-          if (context.secrets) {
-            await context.secrets.store("codingTracker.uploadToken", val.trim());
-            await updateConfigurations(configDeps);
-            vscode.window.showInformationMessage("CodingTracker: Upload token saved to secure storage.");
-          } else {
-            await vscode.workspace.getConfiguration("codingTracker").update("uploadToken", val.trim(), vscode.ConfigurationTarget.Global);
-            await updateConfigurations(configDeps);
-            vscode.window.showWarningMessage("CodingTracker: Secret storage unavailable. Token saved in settings instead.");
-          }
-        } catch (e) {
-          log.error(e);
-        }
-      }));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.flushUploads", () => {
-        try {
-          uploader.flush();
-          vscode.window.showInformationMessage("CodingTracker: flush triggered");
+          const result = await uploader.queueLocalHistoryForDesktop();
+          const importedCount = result && typeof result.importedCount === "number" ? result.importedCount : 0;
+          vscode.window.showInformationMessage(importedCount > 0 ? `SlashCoded: queued ${importedCount} local event${importedCount === 1 ? "" : "s"} for Desktop ingestion.` : "SlashCoded: no local-only history found to queue.");
         } catch (e) {
           log.error(e);
         }

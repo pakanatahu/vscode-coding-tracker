@@ -91,69 +91,34 @@
         "type": "number",
         "default": 500,
         "description": "Timeout in milliseconds for desktop app discovery handshake (default 500)."
+      },
+      "codingTracker.forceLocalFallback": {
+        "type": "boolean",
+        "default": false,
+        "description": "Force local-only fallback storage and report behavior even when Slashcoded Desktop is detected. Useful for testing the built-in local dashboard."
       }
     }
   },
   "commands": [
     {
-      "command": "codingTracker.showReport",
-      "title": "%cmd.showReport%",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.startLocalServer",
-      "title": "%cmd.startLocalServer%",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.stopLocalServer",
-      "title": "%cmd.stopLocalServer%",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.githubAuth",
-      "title": "CodingTracker: GitHub Auth / Refresh Token",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.flushUploads",
-      "title": "CodingTracker: Flush Upload Queue",
-      "category": "CodingTracker"
+      "command": "codingTracker.showLocalReport",
+      "title": "SlashCoded: Show Local Report",
+      "category": "SlashCoded"
     },
     {
       "command": "codingTracker.showSyncStatus",
-      "title": "CodingTracker: Show Sync Status",
-      "category": "CodingTracker"
+      "title": "SlashCoded: Show Sync Status",
+      "category": "SlashCoded"
     },
     {
-      "command": "codingTracker.rediscoverDesktop",
-      "title": "CodingTracker: Re-discover Desktop App",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.setUploadToken",
-      "title": "CodingTracker: Set Upload Token",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.afkEnable",
-      "title": "CodingTracker: AFK Enable",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.afkDisable",
-      "title": "CodingTracker: AFK Disable",
-      "category": "CodingTracker"
-    },
-    {
-      "command": "codingTracker.afkToggle",
-      "title": "CodingTracker: AFK Toggle",
-      "category": "CodingTracker"
+      "command": "codingTracker.queueLocalHistoryForDesktop",
+      "title": "SlashCoded: Import Local History into Desktop",
+      "category": "SlashCoded"
     },
     {
       "command": "codingTracker.showOutput",
-      "title": "CodingTracker: Show Output Channel",
-      "category": "CodingTracker"
+      "title": "SlashCoded: Show Output Channel",
+      "category": "SlashCoded"
     }
   ]
 }

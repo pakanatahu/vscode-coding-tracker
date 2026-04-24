@@ -6,6 +6,13 @@
 # ignore *.vsix (extension archive file)
 *.vsix
 
+.playwright-mcp
+.multiterminal
+.agents
+.vscode
+
+dist
+
 #
 .vscode/settings.json
 # ignore generated i18n files

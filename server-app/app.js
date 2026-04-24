@@ -114,8 +114,7 @@ function render24HourChartCanvas(root, chart, labels, series) {
     if (!canvas || !window.Chart) return;
 
     const datasets = buildAreaDatasets(canvas, series);
-    const maxMinutes = Math.max(15, (Number(chart.maxHours) || 1) * 60);
-    const options = createAreaChartOptions(labels, maxMinutes, chart.currentTimeLabel || '');
+    const options = createAreaChartOptions(labels, chart.currentTimeLabel || '');
     const plugins = [
         createVerticalLinePlugin(),
         createTopStackOutlinePlugin()
@@ -162,8 +161,9 @@ function buildSeriesGradient(canvas, stroke) {
     return gradient;
 }
 
-function createAreaChartOptions(labels, maxMinutes, currentTimeLabel) {
+function createAreaChartOptions(labels, currentTimeLabel) {
     const is24hLabels = labels.length > 0 && labels.length <= 24;
+    const maxMinutes = 60;
     return {
         ...lineBaseOptions(),
         animation: false,
@@ -235,9 +235,9 @@ function createAreaChartOptions(labels, maxMinutes, currentTimeLabel) {
                     color: cssHsl('--muted-foreground')
                 },
                 ticks: {
-                    stepSize: computeMinuteStep(maxMinutes),
+                    stepSize: 15,
                     color: cssHsl('--muted-foreground'),
-                    callback: (value) => formatHourScale(Number(value) / 60)
+                    callback: (value) => formatMinuteTick(Number(value))
                 }
             }
         }
@@ -340,15 +340,9 @@ function withAlpha(color, alpha) {
     return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
-function computeMinuteStep(maxMinutes) {
-    if (maxMinutes <= 15) return 5;
-    if (maxMinutes <= 60) return 15;
-    if (maxMinutes <= 180) return 30;
-    return 60;
-}
-
-function formatHourScale(value) {
-    return `${Number(value).toFixed(1)}h`;
+function formatMinuteTick(value) {
+    if (value === 60) return '1h';
+    return `${Math.max(0, Number(value) || 0)}m`;
 }
 
 function renderQuickStat(label, value) {

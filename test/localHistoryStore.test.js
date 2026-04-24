@@ -32,3 +32,18 @@ test('history store tolerates missing file and malformed lines', async () => {
     assert.equal(records.length, 1);
     assert.equal(records[0].type, 'open');
 });
+
+test('history store takeReportEvents returns records and clears the backlog file', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'coding-tracker-history-'));
+    const store = createHistoryStore({ storagePath: root });
+
+    await store.appendMany([
+        { type: 'open', time: 2000, long: 1000, file: 'src/file.ts', lang: 'typescript' }
+    ]);
+
+    const records = await store.takeReportEvents();
+
+    assert.equal(records.length, 1);
+    assert.equal(records[0].type, 'open');
+    assert.equal(fs.existsSync(store.historyFilePath), false);
+});

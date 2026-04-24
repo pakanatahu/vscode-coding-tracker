@@ -181,7 +181,7 @@
 		"test:node": "node --test test/*.test.js",
 		"setup-i18n": "node ./utils/setup-i18n.js",
 		"bundle": "node ./scripts/esbuild.bundle.mjs",
-		"package": "npm run bundle && npx @vscode/vsce package"
+		"package": "node ./scripts/package-vsix.mjs"
 	},
 	"keywords": [
 		"vscode",

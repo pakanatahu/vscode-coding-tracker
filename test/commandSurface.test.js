@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 
 const repoRoot = path.join(__dirname, '..');
 
@@ -127,4 +128,18 @@ test('package metadata and changelog reflect the reduced SlashCoded command surf
     assert.match(changelog, /SlashCoded: Import Local History into Desktop/);
     assert.equal(changelog.includes('CodingTracker: Show Report'), false);
     assert.equal(changelog.includes('CodingTracker: Queue Local History for Desktop Ingestion'), false);
+});
+
+test('package script writes the SlashCoded VSIX filename', async () => {
+    const pkg = readJson('package.json');
+    const filenameModule = await import(pathToFileURL(path.join(repoRoot, 'scripts/vsixFilename.mjs')));
+    const packageScript = readText('scripts/package-vsix.mjs');
+
+    assert.equal(pkg.scripts.package, 'node ./scripts/package-vsix.mjs');
+    assert.equal(
+        filenameModule.getVsixFilename(pkg.version),
+        `SlashCoded-VSCode-Extension.${pkg.version}.vsix`
+    );
+    assert.match(packageScript, /process\.env\.ComSpec \|\| 'cmd\.exe'/);
+    assert.doesNotMatch(packageScript, /shell: process\.platform === 'win32'/);
 });
