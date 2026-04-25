@@ -141,6 +141,18 @@ test('docs and manifest do not expose deprecated codingTracker settings', () => 
     }
 });
 
+test('active runtime reads slashCoded configuration only', () => {
+    const activeSources = [
+        readText('lib/core/configuration.js'),
+        readText('lib/LocalServer.js'),
+        readText('lib/Uploader.js')
+    ].join('\n');
+
+    assert.match(activeSources, /getConfig\('slashCoded'\)|getConfiguration\('slashCoded'\)/);
+    assert.doesNotMatch(activeSources, /getConfig\('codingTracker'\)|getConfiguration\('codingTracker'\)/);
+    assert.doesNotMatch(activeSources, /connectionMode|functionKey|overrideOrigin|uploadTokenRaw|computerId|forceLocalFallback/);
+});
+
 test('active runtime user-facing copy uses SlashCoded branding', () => {
     const files = [
         'lib/LocalServer.js',

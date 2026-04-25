@@ -430,7 +430,7 @@ Run: `node --test test/localStorageMode.test.js`
 
 Expected: PASS, 4 tests passing.
 
-- [ ] **Step 6: Commit storage mode change**
+- [x] **Step 6: Commit storage mode change**
 
 ```bash
 git add test/localStorageMode.test.js lib/localReport/storageMode.js lib/Uploader.js
@@ -445,7 +445,7 @@ git commit -m "feat: replace fallback flag with storage mode"
 - Modify: `lib/LocalServer.js`
 - Modify: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Add failing runtime namespace test**
+- [x] **Step 1: Add failing runtime namespace test**
 
 Add to `test/commandSurface.test.js`:
 
@@ -463,13 +463,13 @@ test('active runtime reads slashCoded configuration only', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify red**
+- [x] **Step 2: Run test to verify red**
 
 Run: `node --test test/commandSurface.test.js`
 
 Expected: FAIL because active runtime still reads `codingTracker` and cloud/manual upload fields.
 
-- [ ] **Step 3: Update `lib/core/configuration.js`**
+- [x] **Step 3: Update `lib/core/configuration.js`**
 
 Use `ext.getConfig('slashCoded')`. Remove upload-token migration, `connectionMode`, `computerId`, `moreThinkingTime`, proxy, and force fallback reads.
 
@@ -496,7 +496,7 @@ try { uploader.setStorageMode(storageMode); } catch (e) { log.debug('Failed to s
 
 Do not call `uploadObject.init(computerId || ...)`; either call `uploadObject.init()` or remove the dependency if Task 6 removes `pcid`.
 
-- [ ] **Step 4: Remove cloud config reads in `lib/Uploader.js`**
+- [x] **Step 4: Remove cloud config reads in `lib/Uploader.js`**
 
 Remove reads of:
 
@@ -517,7 +517,7 @@ let endpointCandidates = ENDPOINT_CANDIDATES.slice();
 
 Use Desktop local API as the only active mode.
 
-- [ ] **Step 5: Update `lib/LocalServer.js` config reads**
+- [x] **Step 5: Update `lib/LocalServer.js` config reads**
 
 Replace `ext.getConfig('codingTracker')` with `ext.getConfig('slashCoded')`. Remove reliance on `uploadToken`, `serverURL`, and `localServerMode` for active built-in dashboard behavior. Keep the built-in report URL fallback:
 
@@ -527,7 +527,7 @@ return `http://127.0.0.1:${DEFAULT_PORT}/report/`;
 
 If legacy external server functions remain temporarily, do not expose settings for them and do not auto-start them from config.
 
-- [ ] **Step 6: Run runtime namespace tests**
+- [x] **Step 6: Run runtime namespace tests**
 
 Run: `node --test test/commandSurface.test.js`
 
