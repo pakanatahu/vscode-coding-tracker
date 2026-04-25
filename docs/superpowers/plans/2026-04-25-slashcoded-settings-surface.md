@@ -533,7 +533,7 @@ Run: `node --test test/commandSurface.test.js`
 
 Expected: PASS for runtime namespace test and public manifest tests.
 
-- [ ] **Step 7: Commit runtime settings cleanup**
+- [x] **Step 7: Commit runtime settings cleanup**
 
 ```bash
 git add lib/core/configuration.js lib/Uploader.js lib/LocalServer.js test/commandSurface.test.js
@@ -548,7 +548,7 @@ git commit -m "feat: read slashcoded settings at runtime"
 - Modify: `lib/UploadObject.js`
 - Modify: `lib/core/configuration.js`
 
-- [ ] **Step 1: Add failing mapper assertion**
+- [x] **Step 1: Add failing mapper assertion**
 
 In `test/desktopEventMapper.test.js`, add:
 
@@ -573,13 +573,13 @@ test('mapToDesktopEvent ignores pcid and omits it from desktop payload', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify red**
+- [x] **Step 2: Run test to verify red**
 
 Run: `node --test test/desktopEventMapper.test.js`
 
 Expected: FAIL because `project` still falls back to `src.pcid`.
 
-- [ ] **Step 3: Update mapper**
+- [x] **Step 3: Update mapper**
 
 In `lib/core/desktopEventMapper.js`, replace:
 
@@ -593,7 +593,7 @@ with:
 const project = (src && src.proj) || 'vscode-local';
 ```
 
-- [ ] **Step 4: Remove upload object pcid initialization**
+- [x] **Step 4: Remove upload object pcid initialization**
 
 In `lib/UploadObject.js`, remove the `computerId` parameter and the assignment to `baseUploadObject.pcid`. Keep other base fields intact.
 
@@ -611,7 +611,7 @@ Update callers in `lib/core/configuration.js` to:
 uploadObject.init();
 ```
 
-- [ ] **Step 5: Run mapper tests**
+- [x] **Step 5: Run mapper tests**
 
 Run: `node --test test/desktopEventMapper.test.js`
 

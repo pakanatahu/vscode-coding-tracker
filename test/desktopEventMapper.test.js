@@ -29,3 +29,22 @@ test('mapToDesktopEvent stamps timing metadata into payload and occurredAt at se
     assert.equal(event.payload.segmentDurationSeconds, 15);
     assert.equal(event.payload.idleThresholdSeconds, 300);
 });
+
+test('mapToDesktopEvent ignores pcid and omits it from desktop payload', () => {
+    const event = mapToDesktopEvent({
+        type: 'code',
+        time: Date.UTC(2026, 3, 14, 9, 0, 0),
+        long: 60000,
+        pcid: 'legacy-machine',
+        file: 'src/app.js',
+        vcs_repo: 'owner/repo',
+        vcs_branch: 'main'
+    }, {
+        segmentDurationSeconds: 15,
+        idleThresholdSeconds: 300,
+        configVersion: 'test-config'
+    });
+
+    assert.equal(event.project, 'vscode-local');
+    assert.equal(Object.prototype.hasOwnProperty.call(event.payload, 'pcid'), false);
+});
