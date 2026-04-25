@@ -6,6 +6,13 @@
 - Removed cloud-era settings for upload tokens, server URLs, proxy overrides, Azure function keys, manual origins, computer IDs, AFK timeout minutes, and legacy thinking-time tuning.
 - Added `slashCoded.storageMode` with `auto` and `standalone` modes.
 - Removed legacy `pcid` from desktop event payload mapping.
+- Updated Marketplace metadata to use the public SlashCoded identity and VS Code extension ID.
+- Renamed the output channel to `SlashCoded`.
+- Removed legacy cloud/auth/proxy/i18n runtime files and the old external tracker server fallback.
+- Replaced `axios` and `uuid` runtime usage with local Node-based helpers; packaged runtime dependencies now only include Chart.js.
+- Tightened VSIX packaging so development files, tests, docs, old VSIX artifacts, and source-only files are excluded.
+- Added `npm run lint` and cleaned the current JavaScript and declaration-file lint/type diagnostics.
+- Rebuilt `SlashCoded-VSCode-Extension.0.11.0.vsix`; the release package is now about 1.63 MB.
 
 ### 0.10.5 (2026/04/20)
 

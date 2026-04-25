@@ -1,12 +1,12 @@
 {
 	"name": "slashcoded-vscode-extension",
 	"displayName": "SlashCoded",
-	"description": "Track local VS Code activity for the SlashCoded desktop app or the built-in standalone dashboard.",
+	"description": "Track your coding activity in VSCode, visualize your activity in the built-in standalone dashboard or download the free SlashCoded Desktop app for richer analytics",
 	"version": "0.11.0",
 	"type": "commonjs",
 	"license": "GPL-3.0",
 	"publisher": "lundholm",
-	"author": "lundholm",
+	"author": "David Lundholm",
 	"icon": "images/slashcoded.png",
 	"engines": {
 		"vscode": "^1.90.0",
@@ -114,7 +114,7 @@
 	"bugs": {
 		"url": "https://github.com/pakanatahu/vscode-coding-tracker/issues"
 	},
-	"homepage": "https://github.com/pakanatahu/vscode-coding-tracker#readme",
+	"homepage": "https://lundholm.io/projects/slashcoded",
 	"scripts": {
 		"install-vscode-dts": "node ./lib/vscode.d.ts/FETCH.js",
 		"lint": "eslint extension.js lib/index.d.ts lib server-app test scripts --ext .js,.mjs",
