@@ -20,6 +20,7 @@ The current extension still exposes several `codingTracker.*` settings in VS Cod
 - Remove cloud-only settings and active runtime assumptions from the public extension path.
 - Represent the two supported modes with one clear setting.
 - Keep the implementation testable with explicit checks against stale settings.
+- Bump the extension version for the first public settings and command surface.
 
 ## Non-Goals
 
@@ -106,6 +107,7 @@ Add focused tests that assert:
 - `storageMode: "standalone"` keeps live events local.
 - `storageMode: "auto"` keeps the current Desktop-when-detected behavior.
 - Desktop-mapped upload payloads omit `pcid`.
+- `package.json` and `package-lock.json` carry the bumped extension version.
 
 Run the existing command surface tests and local storage mode tests after the cleanup.
 
@@ -119,4 +121,5 @@ Run the existing command surface tests and local storage mode tests after the cl
 6. Remove `computerId` and `pcid` from the active desktop upload path.
 7. Remove cloud-only active settings and code paths from the public runtime where the tests can cover them.
 8. Update README and localization strings.
-9. Bundle and package the extension, then inspect the generated VSIX settings and command surfaces.
+9. Bump the extension version in `package.json` and `package-lock.json`.
+10. Bundle and package the extension, then inspect the generated VSIX settings and command surfaces.
