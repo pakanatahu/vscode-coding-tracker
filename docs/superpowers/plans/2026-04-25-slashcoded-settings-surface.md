@@ -318,7 +318,7 @@ Run: `node --test test/commandSurface.test.js`
 
 Expected: command ID tests PASS; settings/runtime config tests may still FAIL until later tasks.
 
-- [ ] **Step 4: Commit command ID runtime change**
+- [x] **Step 4: Commit command ID runtime change**
 
 ```bash
 git add lib/LocalServer.js lib/extensionMain.js lib/StatusBarManager.js test/commandSurface.test.js
@@ -332,7 +332,7 @@ git commit -m "feat: rename extension commands to slashcoded"
 - Modify: `lib/localReport/storageMode.js`
 - Modify: `lib/Uploader.js`
 
-- [ ] **Step 1: Replace storage mode tests**
+- [x] **Step 1: Replace storage mode tests**
 
 Replace `test/localStorageMode.test.js` with:
 
@@ -368,13 +368,13 @@ test('shouldQueueLiveEvents treats unknown storageMode as auto', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify red**
+- [x] **Step 2: Run test to verify red**
 
 Run: `node --test test/localStorageMode.test.js`
 
 Expected: FAIL because `storageMode` is not implemented and cloud mode is still supported.
 
-- [ ] **Step 3: Implement storage mode helper**
+- [x] **Step 3: Implement storage mode helper**
 
 Replace `lib/localReport/storageMode.js` with:
 
@@ -398,7 +398,7 @@ module.exports = {
 };
 ```
 
-- [ ] **Step 4: Update uploader storage state**
+- [x] **Step 4: Update uploader storage state**
 
 In `lib/Uploader.js`, replace `forceLocalFallback` state and setter with:
 
@@ -424,7 +424,7 @@ if (!shouldQueueLiveEvents({ storageMode, discovery })) {
 
 Remove `setForceLocalFallback`.
 
-- [ ] **Step 5: Run storage tests**
+- [x] **Step 5: Run storage tests**
 
 Run: `node --test test/localStorageMode.test.js`
 
