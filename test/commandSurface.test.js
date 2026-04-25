@@ -172,6 +172,22 @@ test('active runtime user-facing copy uses SlashCoded branding', () => {
     }
 });
 
+test('desktop uploads use the strict v2 wrapper contract', () => {
+    const uploader = readText('lib/Uploader.js');
+
+    assert.match(uploader, /contractVersion:\s*'v2'/);
+    assert.match(uploader, /events:\s*\[desktopEvent\]/);
+});
+
+test('desktop registration uses the Marketplace extension identity', () => {
+    const pkg = readJson('package.json');
+    const uploader = readText('lib/Uploader.js');
+    const extensionId = `${pkg.publisher}.${pkg.name}`;
+
+    assert.match(uploader, new RegExp(`EXTENSION_CLIENT_ID\\s*=\\s*'${extensionId}'`));
+    assert.doesNotMatch(uploader, /clientId:\s*'vscode-extension'|clientId:\s*'vscode'/);
+});
+
 test('sync status workflow and README avoid removed command labels', () => {
     const extensionMain = readText('lib/extensionMain.js');
     const readme = readText('README.md');
@@ -254,7 +270,7 @@ test('marketplace metadata uses the public SlashCoded identity', () => {
     assert.equal(pkg.displayName, 'SlashCoded');
     assert.equal(pkg.publisher, 'lundholm');
     assert.equal(pkg.icon, 'images/slashcoded.png');
-    assert.match(pkg.description, /^Track local VS Code activity/);
+    assert.match(pkg.description, /^Track your coding activity in VSCode/);
     assert.doesNotMatch(pkg.description, /fork|cloud|upload token|computer id/i);
 });
 

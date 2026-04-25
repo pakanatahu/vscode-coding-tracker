@@ -1,8 +1,23 @@
 ![](images\slashcoded.png)
 
-# SlashCoded
+# SlashCoded for VS Code
 
-SlashCoded tracks local VS Code activity for the SlashCoded desktop app or the built-in standalone dashboard. It records coding, watching, terminal, chat, AFK, and file-edit activity on your machine. There is no cloud upload path in this extension.
+SlashCoded is a free, advanced coding tracker for VS Code. It measures coding activity and turns it into useful local reporting data. It is designed for the [SlashCoded Desktop](https://lundholm.io/projects/slashcoded) ecosystem, where the extension acts as an activity producer and sends events to the desktop app's local ingest service.
+
+The extension can also run on its own. If SlashCoded Desktop is not installed, SlashCoded stores activity locally and shows it in the built-in dashboard. There is no cloud upload path in this extension.
+
+SlashCoded is a fork of the original work by [LiuYue (hangxingliu)](https://github.com/hangxingliu). This version expands tracking beyond editor activity with terminal and AI chat detection, including GitHub Copilot, Codex, Claude, and other focused AI chat panels.
+
+## Measured Activities
+
+SlashCoded detects the active work mode in VS Code and records the following activity types:
+
+- Reading: a file is open and focused in the editor
+- Writing: a focused editor file is actively being edited
+- Terminal: the integrated terminal is focused
+- AI chat: an AI chat panel is focused
+- Idle: the VS Code window is not focused
+- AFK: VS Code has had no user activity for the configured idle period
 
 Highlights:
 - Tracks terminal usage, AI chat conversations, and reading vs writing inside VS Code
@@ -57,7 +72,7 @@ Settings are under Preferences -> Settings -> SlashCoded:
 
 ## SlashCoded Desktop
 
-1. Download the Windows installer from https://lundholm.io/project/slashcoded.
+1. Download the Windows installer from https://lundholm.io/projects/slashcoded.
 2. Run the installer, sign in or create an account, and let the app install the local ingest service.
 3. Start the desktop app before launching VS Code so the extension discovers it automatically.
 4. Use `SlashCoded: Show Sync Status` if Desktop starts after VS Code.

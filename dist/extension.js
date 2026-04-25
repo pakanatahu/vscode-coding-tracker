@@ -88,6 +88,9 @@ var require_httpClient = __commonJS({
         const url = new URL(target);
         const body = normalizeBody(options.data);
         const headers = normalizeHeaders(options.headers);
+        if (body && isJsonBody(options.data) && !hasHeader(headers, "content-type")) {
+          headers["Content-Type"] = "application/json; charset=utf-8";
+        }
         if (body && !hasHeader(headers, "content-length")) headers["Content-Length"] = String(Buffer.byteLength(body));
         const client = url.protocol === "https:" ? https : http;
         const req = client.request(url, {
@@ -143,6 +146,12 @@ var require_httpClient = __commonJS({
       if (Buffer.isBuffer(data)) return data;
       if (typeof data === "string") return data;
       return JSON.stringify(data);
+    }
+    function isJsonBody(data) {
+      if (typeof data === "undefined" || data === null) return false;
+      if (Buffer.isBuffer(data)) return false;
+      if (typeof data === "string") return false;
+      return true;
     }
     function parseBody(raw, contentType) {
       if (!raw) return null;
@@ -1209,6 +1218,8 @@ var require_Uploader = __commonJS({
     var TRUST_ENROLL_MIN_INTERVAL_MS = 60 * 1e3;
     var ENFORCEMENT_REFRESH_MS = 6e4;
     var DESKTOP_ENDPOINT_CANDIDATES = ["api/upload", "api/queue/upload"];
+    var EXTENSION_CLIENT_ID = "lundholm.slashcoded-vscode-extension";
+    var EXTENSION_DISPLAY_NAME = "SlashCoded VS Code Extension";
     var Q = [];
     var uploadURL = "";
     var uploadToken = "";
@@ -1591,7 +1602,7 @@ var require_Uploader = __commonJS({
       const isDesktopUploadEndpoint = /api\/(?:queue\/)?upload/.test(uploadURL);
       if (isDesktopUploadEndpoint) {
         const desktopEvent = mapToDesktopEvent(sendData, item.trackingConfig || trackingConfig);
-        uploadOptions.data = JSON.stringify({ events: [desktopEvent] });
+        uploadOptions.data = JSON.stringify({ contractVersion: "v2", events: [desktopEvent] });
         uploadOptions.headers = { ...uploadOptions.headers || {}, "Content-Type": "application/json; charset=utf-8" };
         if (bodySizeBytes(uploadOptions.data) > MAX_EVENT_SIZE_BYTES) {
           appendDeadLetter(item, 400, "payload-too-large");
@@ -1638,13 +1649,12 @@ ${dump}`);
             showErrorMessage(3, `Upload error: Response: ${status} (${statusText || "Bad Request"})`);
           }
           if (status === 400 && !success) shouldDropCurrentItem = true;
-          const enforceActive = enforcementMode === "enforce";
-          if (status === 403 && enforceActive && trustedSigned && shouldSignTrustedUpload(uploadURL)) {
+          if (status === 403 && trustedSigned && shouldSignTrustedUpload(uploadURL)) {
             await clearTrustedSource("trusted-rejected", true);
           }
         } else if (status === 401) {
           success = false;
-          if (enforcementMode === "enforce" && trustedSigned && shouldSignTrustedUpload(uploadURL)) {
+          if (trustedSigned && shouldSignTrustedUpload(uploadURL)) {
             await clearTrustedSource("trusted-unauthorized", true);
           }
         } else if (status === 404) {
@@ -1986,7 +1996,7 @@ ${dump}`);
       if (!base) return !!uploadToken;
       const url = ensureTrailingSlash(base) + TOKEN_REQUEST_PATH;
       try {
-        const payload = { clientId: "vscode", clientType: "extension", machineId: machineId || require("os").hostname() };
+        const payload = { clientId: EXTENSION_CLIENT_ID, clientType: "extension", machineId: machineId || require("os").hostname() };
         const res = await httpClient.post(url, payload, { timeout: requestTimeoutMs });
         if (res && res.status >= 200 && res.status < 300 && res.data && res.data.token) {
           tokenInfo = { token: res.data.token, expiresAt: parseExpires(res.data.expiresAt) };
@@ -2030,10 +2040,10 @@ ${dump}`);
       const url = ensureTrailingSlash(base) + TRUST_REGISTER_PATH;
       try {
         const payload = {
-          clientId: "vscode-extension",
+          clientId: EXTENSION_CLIENT_ID,
           clientType: "vscode",
           machineId: machineId || require("os").hostname(),
-          displayName: "VS Code Extension"
+          displayName: EXTENSION_DISPLAY_NAME
         };
         const res = await httpClient.post(url, payload, { timeout: requestTimeoutMs, validateStatus: () => true });
         if (res && res.status >= 200 && res.status < 300 && res.data && res.data.sourceId && res.data.secret) {

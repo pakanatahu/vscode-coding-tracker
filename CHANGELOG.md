@@ -7,6 +7,7 @@
 - Added `slashCoded.storageMode` with `auto` and `standalone` modes.
 - Removed legacy `pcid` from desktop event payload mapping.
 - Updated Marketplace metadata to use the public SlashCoded identity and VS Code extension ID.
+- Desktop token and trusted-source registration now identify as `lundholm.slashcoded-vscode-extension`, so the local Desktop allowlist can validate the renamed extension.
 - Renamed the output channel to `SlashCoded`.
 - Removed legacy cloud/auth/proxy/i18n runtime files and the old external tracker server fallback.
 - Replaced `axios` and `uuid` runtime usage with local Node-based helpers; packaged runtime dependencies now only include Chart.js.
