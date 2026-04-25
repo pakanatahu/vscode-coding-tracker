@@ -18,15 +18,59 @@ test('package contributes only the approved SlashCoded commands', () => {
     const pkg = readJson('package.json');
     const commands = (pkg.contributes && pkg.contributes.commands) || [];
     const expected = [
-        'codingTracker.showLocalReport',
-        'codingTracker.showSyncStatus',
-        'codingTracker.queueLocalHistoryForDesktop',
-        'codingTracker.showOutput'
+        'slashCoded.showLocalReport',
+        'slashCoded.showSyncStatus',
+        'slashCoded.queueLocalHistoryForDesktop',
+        'slashCoded.showOutput'
     ];
 
     assert.deepEqual(commands.map(command => command.command), expected);
 
     for (const command of commands) {
+        assert.match(command.command, /^slashCoded\./);
+        assert.match(command.title, /^SlashCoded:/);
+        assert.equal(command.category, 'SlashCoded');
+    }
+});
+
+test('package contributes only the approved slashCoded settings', () => {
+    const pkg = readJson('package.json');
+    const properties = pkg.contributes.configuration.properties;
+    const settingKeys = Object.keys(properties);
+    const expected = [
+        'slashCoded.showStatus',
+        'slashCoded.shouldTrackTerminal',
+        'slashCoded.shouldTrackAIChat',
+        'slashCoded.afkEnabled',
+        'slashCoded.uploadTimeoutMs',
+        'slashCoded.desktopDiscoveryTimeoutMs',
+        'slashCoded.storageMode'
+    ];
+
+    assert.deepEqual(settingKeys, expected);
+
+    for (const key of settingKeys) {
+        assert.match(key, /^slashCoded\./);
+    }
+
+    assert.deepEqual(properties['slashCoded.storageMode'].enum, ['auto', 'standalone']);
+    assert.equal(properties['slashCoded.storageMode'].default, 'auto');
+});
+
+test('package contributes only slashCoded command IDs', () => {
+    const pkg = readJson('package.json');
+    const commands = pkg.contributes.commands;
+    const expected = [
+        'slashCoded.showLocalReport',
+        'slashCoded.showSyncStatus',
+        'slashCoded.queueLocalHistoryForDesktop',
+        'slashCoded.showOutput'
+    ];
+
+    assert.deepEqual(commands.map(command => command.command), expected);
+
+    for (const command of commands) {
+        assert.match(command.command, /^slashCoded\./);
         assert.match(command.title, /^SlashCoded:/);
         assert.equal(command.category, 'SlashCoded');
     }
@@ -49,6 +93,10 @@ test('active runtime modules do not register removed standalone commands', () =>
     ].join('\n');
 
     const removedCommands = [
+        'codingTracker.showLocalReport',
+        'codingTracker.showSyncStatus',
+        'codingTracker.queueLocalHistoryForDesktop',
+        'codingTracker.showOutput',
         'codingTracker.showReport',
         'codingTracker.startLocalServer',
         'codingTracker.stopLocalServer',
@@ -67,6 +115,29 @@ test('active runtime modules do not register removed standalone commands', () =>
             new RegExp(`registerCommand\\('${commandId.replaceAll('.', '\\.')}`),
             `expected removed command ${commandId} to stay unregistered`
         );
+    }
+});
+
+test('docs and manifest do not expose deprecated codingTracker settings', () => {
+    const pkg = readJson('package.json');
+    const readme = readText('README.md');
+    const manifestText = JSON.stringify(pkg);
+    const deprecated = [
+        'codingTracker.connectionMode',
+        'codingTracker.uploadToken',
+        'codingTracker.computerId',
+        'codingTracker.localServerMode',
+        'codingTracker.moreThinkingTime',
+        'codingTracker.proxy',
+        'codingTracker.functionKey',
+        'codingTracker.overrideOrigin',
+        'codingTracker.afkTimeoutMinutes',
+        'codingTracker.forceLocalFallback'
+    ];
+
+    for (const key of deprecated) {
+        assert.equal(manifestText.includes(key), false, `manifest still exposes ${key}`);
+        assert.equal(readme.includes(key), false, `README still documents ${key}`);
     }
 });
 

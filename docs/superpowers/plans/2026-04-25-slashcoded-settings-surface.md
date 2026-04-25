@@ -34,7 +34,7 @@
 **Files:**
 - Modify: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Add failing manifest tests**
+- [x] **Step 1: Add failing manifest tests**
 
 Add this test near the existing command surface tests:
 
@@ -83,7 +83,7 @@ test('package contributes only slashCoded command IDs', () => {
 });
 ```
 
-- [ ] **Step 2: Update removed-command expectations**
+- [x] **Step 2: Update removed-command expectations**
 
 Change the existing `expected` command list from `codingTracker.*` to `slashCoded.*`. Change the `removedCommands` array to include the old public command IDs:
 
@@ -106,7 +106,7 @@ const removedCommands = [
 ];
 ```
 
-- [ ] **Step 3: Add deprecated settings text checks**
+- [x] **Step 3: Add deprecated settings text checks**
 
 Add this test:
 
@@ -135,7 +135,7 @@ test('docs and manifest do not expose deprecated codingTracker settings', () => 
 });
 ```
 
-- [ ] **Step 4: Run test to verify red**
+- [x] **Step 4: Run test to verify red**
 
 Run: `node --test test/commandSurface.test.js`
 
