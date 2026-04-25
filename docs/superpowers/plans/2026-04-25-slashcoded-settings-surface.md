@@ -141,7 +141,7 @@ Run: `node --test test/commandSurface.test.js`
 
 Expected: FAIL because `package.json` still contributes `codingTracker.*` settings and commands.
 
-- [ ] **Step 5: Commit the failing tests**
+- [x] **Step 5: Commit the failing tests**
 
 ```bash
 git add test/commandSurface.test.js
@@ -158,7 +158,7 @@ git commit -m "test: lock slashcoded public extension surface"
 - Modify: `package.nls.zh-cn.json`
 - Modify: `package.nls.zh-tw.json`
 
-- [ ] **Step 1: Replace contributed settings**
+- [x] **Step 1: Replace contributed settings**
 
 In `package.json`, replace `contributes.configuration.title` with:
 
@@ -214,7 +214,7 @@ Replace `contributes.configuration.properties` with:
 }
 ```
 
-- [ ] **Step 2: Replace contributed command IDs**
+- [x] **Step 2: Replace contributed command IDs**
 
 In `package.json`, replace the command IDs with:
 
@@ -243,7 +243,7 @@ In `package.json`, replace the command IDs with:
 ]
 ```
 
-- [ ] **Step 3: Remove stale nls keys**
+- [x] **Step 3: Remove stale nls keys**
 
 In every `package.nls*.json` file, remove stale `cfg.*` entries for removed contributed settings. Keep the file as valid JSON. If no keys remain that are referenced by `package.json`, leave an empty object:
 
@@ -251,7 +251,7 @@ In every `package.nls*.json` file, remove stale `cfg.*` entries for removed cont
 {}
 ```
 
-- [ ] **Step 4: Run manifest tests**
+- [x] **Step 4: Run manifest tests**
 
 Run: `node --test test/commandSurface.test.js`
 
