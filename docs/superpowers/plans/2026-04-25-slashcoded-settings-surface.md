@@ -617,7 +617,7 @@ Run: `node --test test/desktopEventMapper.test.js`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit payload cleanup**
+- [x] **Step 6: Commit payload cleanup**
 
 ```bash
 git add test/desktopEventMapper.test.js lib/core/desktopEventMapper.js lib/UploadObject.js lib/core/configuration.js
@@ -633,7 +633,7 @@ git commit -m "fix: remove legacy pcid from desktop events"
 - Modify: `package-lock.json`
 - Modify: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Add version test**
+- [x] **Step 1: Add version test**
 
 Add to `test/commandSurface.test.js`:
 
@@ -648,13 +648,13 @@ test('package files carry the first public settings surface version', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify red**
+- [x] **Step 2: Run test to verify red**
 
 Run: `node --test test/commandSurface.test.js`
 
 Expected: FAIL because package files still use `0.10.4`.
 
-- [ ] **Step 3: Update README settings section**
+- [x] **Step 3: Update README settings section**
 
 Replace the `## Configuration` list with:
 
@@ -678,7 +678,7 @@ Remove the Highlights bullet `Proxy and timeout configuration for uploads` and r
 - Desktop discovery, standalone local storage, and upload timeout controls
 ```
 
-- [ ] **Step 4: Add changelog entry**
+- [x] **Step 4: Add changelog entry**
 
 At the top of `CHANGELOG.md`, add:
 
@@ -691,7 +691,7 @@ At the top of `CHANGELOG.md`, add:
 - Removed legacy `pcid` from desktop event payload mapping.
 ```
 
-- [ ] **Step 5: Bump version**
+- [x] **Step 5: Bump version**
 
 Change `package.json`:
 
@@ -715,7 +715,7 @@ and:
 }
 ```
 
-- [ ] **Step 6: Run docs/version tests**
+- [x] **Step 6: Run docs/version tests**
 
 Run: `node --test test/commandSurface.test.js`
 

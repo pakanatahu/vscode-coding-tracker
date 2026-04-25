@@ -238,3 +238,12 @@ test('package script writes the SlashCoded VSIX filename', async () => {
     assert.match(packageScript, /process\.env\.ComSpec \|\| 'cmd\.exe'/);
     assert.doesNotMatch(packageScript, /shell: process\.platform === 'win32'/);
 });
+
+test('package files carry the first public settings surface version', () => {
+    const pkg = readJson('package.json');
+    const lock = readJson('package-lock.json');
+
+    assert.equal(pkg.version, '0.11.0');
+    assert.equal(lock.version, '0.11.0');
+    assert.equal(lock.packages[''].version, '0.11.0');
+});

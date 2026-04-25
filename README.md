@@ -28,7 +28,7 @@ All part of this extension(included server program, documents) are open-source a
 - Captures sync status, upload queue depth, and desktop app connectivity health for SlashCoded
 - Stores a local raw activity history even when Slashcoded Desktop is not installed
 - Built-in fallback summary dashboard grouped by activity, repository, branch, and file extension
-- Proxy and timeout configuration for uploads
+- Desktop discovery, standalone local storage, and upload timeout controls
 
 ## Useful commands
 
@@ -78,15 +78,15 @@ Install from VSIX:
 
 ## Configuration
 
-Settings (Preferences → Settings → Coding Tracker):
+Settings (Preferences -> Settings -> SlashCoded):
 
-- codingTracker.uploadToken: optional legacy/manual token field; most users should rely on Slashcoded Desktop discovery instead
-- codingTracker.computerId: optional identifier for your machine
-- codingTracker.showStatus: toggle the status bar item
-- codingTracker.proxy: “auto”, “no-proxy”, false, or host:port (for uploads)
-- codingTracker.uploadTimeoutMs: per-request timeout
-- codingTracker.afkEnabled / codingTracker.afkTimeoutMinutes: AFK detection
-- codingTracker.shouldTrackTerminal / codingTracker.shouldTrackAIChat: per-feature toggles
+- `slashCoded.storageMode`: `auto` uses SlashCoded Desktop when detected and local history otherwise; `standalone` always uses the built-in local dashboard
+- `slashCoded.showStatus`: show or hide the status bar item
+- `slashCoded.shouldTrackTerminal`: include terminal activity
+- `slashCoded.shouldTrackAIChat`: include AI chat activity
+- `slashCoded.afkEnabled`: pause or classify tracking when VS Code is idle
+- `slashCoded.uploadTimeoutMs`: local Desktop API upload timeout in milliseconds
+- `slashCoded.desktopDiscoveryTimeoutMs`: local Desktop discovery timeout in milliseconds
 
 ## SlashCoded desktop app (Windows only)
 

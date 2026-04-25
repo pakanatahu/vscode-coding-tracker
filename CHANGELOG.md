@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.11.0
+
+- Renamed the public settings and command IDs from `codingTracker.*` to `slashCoded.*` for the first public release.
+- Removed cloud-era settings for upload tokens, server URLs, proxy overrides, Azure function keys, manual origins, computer IDs, AFK timeout minutes, and legacy thinking-time tuning.
+- Added `slashCoded.storageMode` with `auto` and `standalone` modes.
+- Removed legacy `pcid` from desktop event payload mapping.
+
 ### 0.10.5 (2026/04/20)
 
 1. Local fallback history
