@@ -27,7 +27,6 @@ The current extension still exposes several `codingTracker.*` settings in VS Cod
 - Do not support cloud uploads.
 - Do not keep `computerId` as a user setting.
 - Do not add migration code for pre-release builds.
-- Do not redesign command IDs in this spec. Commands may remain `codingTracker.*` internally unless a separate command migration is approved.
 
 ## Proposed Settings
 
@@ -69,6 +68,8 @@ These keys should not appear in `package.json`, `package.nls*.json`, README sett
 
 Configuration reads should switch from `codingTracker` to `slashCoded`.
 
+Command IDs should also switch from `codingTracker.*` to `slashCoded.*`. The first public release should not expose old command IDs or old settings IDs.
+
 `storageMode` replaces `forceLocalFallback`:
 
 - `auto` maps to the current default behavior: queue events to Desktop when discovery succeeds, and otherwise write local history for the built-in dashboard.
@@ -76,7 +77,7 @@ Configuration reads should switch from `codingTracker` to `slashCoded`.
 
 Cloud mode should be removed from the active runtime path. The uploader should no longer need a user-selected `connectionMode`, cloud endpoint fallback list, upload token setting, function key setting, override origin setting, or user proxy override.
 
-`computerId` should not be user-configurable. If the upload payload still requires a `pcid` field for compatibility with an internal event contract, the extension should set a stable internal value without exposing it as a setting. If the desktop API no longer requires it, remove it from the mapped desktop payload in the same cleanup.
+`computerId` should not be user-configurable. `pcid` should be removed from the desktop upload payload because the desktop reporting model no longer uses it.
 
 `afkTimeoutMinutes` should be removed because active configuration already gets idle timing from host tracking config, with a default fallback in `hostTiming`.
 
@@ -98,11 +99,13 @@ Localization strings should be updated or removed so old settings do not leak in
 Add focused tests that assert:
 
 - All contributed configuration keys start with `slashCoded.`.
+- All contributed command IDs start with `slashCoded.`.
 - The contributed settings list matches the approved public list.
 - Deprecated `codingTracker.*` settings are not present in `package.json`.
-- Runtime configuration reads use `slashCoded`, not `codingTracker`, in active modules.
+- Runtime configuration reads and command registrations use `slashCoded`, not `codingTracker`, in active modules.
 - `storageMode: "standalone"` keeps live events local.
 - `storageMode: "auto"` keeps the current Desktop-when-detected behavior.
+- Desktop-mapped upload payloads omit `pcid`.
 
 Run the existing command surface tests and local storage mode tests after the cleanup.
 
@@ -110,13 +113,10 @@ Run the existing command surface tests and local storage mode tests after the cl
 
 1. Add failing tests for the public settings list and namespace.
 2. Update `package.json` contributed configuration to `slashCoded.*`.
-3. Update active runtime configuration reads to use `slashCoded`.
-4. Replace `forceLocalFallback` with `storageMode`.
-5. Remove cloud-only active settings and code paths from the public runtime where the tests can cover them.
-6. Update README and localization strings.
-7. Bundle and package the extension, then inspect the generated VSIX settings surface.
-
-## Open Decisions
-
-- Decide whether command IDs should also move from `codingTracker.*` to `slashCoded.*`. This spec keeps command IDs unchanged to avoid mixing command migration with settings cleanup.
-- Decide whether the desktop upload payload may omit `pcid`. If not, keep an internal fallback value without exposing a setting.
+3. Update contributed command IDs and active command registrations to `slashCoded.*`.
+4. Update active runtime configuration reads to use `slashCoded`.
+5. Replace `forceLocalFallback` with `storageMode`.
+6. Remove `computerId` and `pcid` from the active desktop upload path.
+7. Remove cloud-only active settings and code paths from the public runtime where the tests can cover them.
+8. Update README and localization strings.
+9. Bundle and package the extension, then inspect the generated VSIX settings and command surfaces.
