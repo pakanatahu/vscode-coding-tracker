@@ -1,49 +1,55 @@
-# ".vscode" would not match xx/xx/.vscode
+.agents/**
+.github/**
+.multiterminal/**
+.playwright-mcp/**
 .vscode/**
 
-lib/vscode.d.ts/*.d.ts
-
+database/**
 docs/**
+lib/**
+logs/**
+scripts/**
 test/**
 tests/**
+utils/**
 __tests__/**
 
-logs/**
-diagnose.log
+node_modules/**
+!node_modules/chart.js/
+node_modules/chart.js/**
+!node_modules/chart.js/dist/
+node_modules/chart.js/dist/**
+!node_modules/chart.js/dist/chart.umd.js
+!node_modules/chart.js/LICENSE.md
 
+images/advanced-multiterminal-activity-20260420.png
+images/icon_*.png
 images/screenshots/**
 
-*.map
-*.tsbuildinfo
-
-node_modules/**/test/**
-node_modules/**/tests/**
-node_modules/**/examples/**
-node_modules/**/docs/**
-node_modules/**/.bin/**
-node_modules/**/.cache/**
-node_modules/**/.github/**
-node_modules/**/.vscode/**
-
-TODO.md
-
-database
-
-npm-debug.log*
-.eslintrc.json
-
+.editorconfig
+.eslintrc.js
+.gitignore
+.npmignore
+.nvmrc
+.travis.yml
+CONTRIBUTING.md
 DEBUG_SIGN_FILE
+TODO.md
+diagnose.log
+package-lock.json
+package.nls*.json
 
-# any archives
 *.7z
-*.zip
-*.tgz
+*.map
 *.tar
+*.tgz
+*.tsbuildinfo
 *.vsix
+*.zip
+npm-debug.log*
 
-.agents/**
-.idea/**
+.DS_Store
 .fleet/**
 .history/**
-.DS_Store
+.idea/**
 Thumbs.db

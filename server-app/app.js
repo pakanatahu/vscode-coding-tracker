@@ -73,16 +73,6 @@ function renderQuickStats(totals, root) {
     `;
 }
 
-function renderLegendPill(item) {
-    return `
-        <div class="legend-pill">
-            <span class="legend-dot" style="background:${escapeHtml(item.color || '#ffffff')}"></span>
-            <span class="legend-label">${escapeHtml(item.label || 'Unknown')}</span>
-            <span class="legend-total">${escapeHtml(formatDuration(item.totalMs || 0))}</span>
-        </div>
-    `;
-}
-
 function renderBreakdownToolbar(chart) {
     const label = chart.breakdownLabel || 'Break down by';
     const options = Array.isArray(chart.breakdownOptions) && chart.breakdownOptions.length
@@ -411,14 +401,6 @@ function formatDuration(totalMs) {
     if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
     if (minutes > 0) return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
     return `${seconds}s`;
-}
-
-function formatDate(timestamp) {
-    try {
-        return new Date(timestamp).toLocaleString();
-    } catch (_) {
-        return 'Unknown';
-    }
 }
 
 function formatRangeLabel(startTimestamp, endTimestamp) {

@@ -15,4 +15,4 @@
 
 > LOCALE reference: [Available Locales](https://code.visualstudio.com/docs/getstarted/locales) 
 
-I18N config files are located in `./lib/i18n/`. 
+Package metadata is maintained directly in `package.json`.

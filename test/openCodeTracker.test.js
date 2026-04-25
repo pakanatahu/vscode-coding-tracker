@@ -4,6 +4,10 @@ const assert = require('node:assert/strict');
 const runtime = require('../lib/core/runtime');
 const { createOpenCodeTracker } = require('../lib/tracking/OpenCodeTracker');
 
+function noop() {
+    return undefined;
+}
+
 function createDocument(path = 'C:\\repo\\file.ts', languageId = 'typescript') {
     return {
         uri: {
@@ -28,7 +32,7 @@ test('open code tracking finalizes the active editor slice when the window loses
     const tracker = createOpenCodeTracker({
         vscode: {},
         ext: {},
-        log: { debug() {} },
+        log: { debug: noop },
         isDebugMode: false,
         state,
         uploader: { upload: (payload) => uploads.push(payload) },
@@ -43,9 +47,9 @@ test('open code tracking finalizes the active editor slice when the window loses
         },
         mode: {
             updateModeBasedOnState: () => modeUpdates.push(state.windowFocused),
-            refreshStatusBarMode: () => {}
+            refreshStatusBarMode: noop
         },
-        recordUserActivity: () => {}
+        recordUserActivity: noop
     });
 
     state.activeDocument = doc;
@@ -70,19 +74,19 @@ test('open code tracking starts a fresh slice when focus returns', () => {
     const tracker = createOpenCodeTracker({
         vscode: {},
         ext: {},
-        log: { debug() {} },
+        log: { debug: noop },
         isDebugMode: false,
         state,
-        uploader: { upload() {} },
+        uploader: { upload: noop },
         uploadObject: {
             generateOpen: async () => null,
             generateCode: async () => null
         },
         mode: {
-            updateModeBasedOnState: () => {},
-            refreshStatusBarMode: () => {}
+            updateModeBasedOnState: noop,
+            refreshStatusBarMode: noop
         },
-        recordUserActivity: () => {}
+        recordUserActivity: noop
     });
 
     state.activeDocument = doc;
@@ -105,7 +109,7 @@ test('open code tick does not emit background segments while the window is unfoc
     const tracker = createOpenCodeTracker({
         vscode: {},
         ext: {},
-        log: { debug() {} },
+        log: { debug: noop },
         isDebugMode: false,
         state,
         uploader: { upload: (payload) => uploads.push(payload) },
@@ -114,10 +118,10 @@ test('open code tick does not emit background segments while the window is unfoc
             generateCode: async (_doc, start, duration) => ({ kind: 'code', start, duration })
         },
         mode: {
-            updateModeBasedOnState: () => {},
-            refreshStatusBarMode: () => {}
+            updateModeBasedOnState: noop,
+            refreshStatusBarMode: noop
         },
-        recordUserActivity: () => {}
+        recordUserActivity: noop
     });
 
     state.activeDocument = doc;

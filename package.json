@@ -1,15 +1,15 @@
 {
-	"name": "vscode-coding-tracker-fork",
-	"displayName": "Slashcoded Coding tracker",
-	"description": "Integrates VS Code with the SlashCoded desktop app (lundholm.io/project/slashcoded) to track coding time, file edits, terminal sessions, AI chats, AFK, and sync status through the local report, sync status, history import, and output commands.",
+	"name": "slashcoded-vscode-extension",
+	"displayName": "SlashCoded",
+	"description": "Track local VS Code activity for the SlashCoded desktop app or the built-in standalone dashboard.",
 	"version": "0.11.0",
 	"type": "commonjs",
 	"license": "GPL-3.0",
 	"publisher": "lundholm",
-	"author": "pakanatahu",
+	"author": "lundholm",
 	"icon": "images/slashcoded.png",
 	"engines": {
-		"vscode": "^1.1.0",
+		"vscode": "^1.90.0",
 		"node": ">=22.0.0"
 	},
 	"categories": [
@@ -24,23 +24,17 @@
 	],
 	"main": "./dist/extension.js",
 	"dependencies": {
-		"axios": "^1.7.7",
-		"chart.js": "^4.5.1",
-		"tree-kill": "^1.2.2",
-		"uuid": "^8.3.2",
-		"vscode-coding-tracker-server": "^0.6.0"
+		"chart.js": "^4.5.1"
 	},
 	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^5.4.0",
+		"@typescript-eslint/parser": "^5.4.0",
 		"@types/node": "^22",
 		"@types/vscode": "*",
 		"@vscode/vsce": "^2.22.0",
 		"esbuild": "^0.25.10",
+		"eslint": "^8.2.0",
 		"typescript": "^5.8.3"
-	},
-	"optionalDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.4.0",
-		"@typescript-eslint/parser": "^5.4.0",
-		"eslint": "^8.2.0"
 	},
 	"contributes": {
 		"configuration": {
@@ -123,10 +117,9 @@
 	"homepage": "https://github.com/pakanatahu/vscode-coding-tracker#readme",
 	"scripts": {
 		"install-vscode-dts": "node ./lib/vscode.d.ts/FETCH.js",
-		"start": "./node_modules/.bin/coding-tracker-server",
-		"test": "npm run setup-i18n",
+		"lint": "eslint extension.js lib/index.d.ts lib server-app test scripts --ext .js,.mjs",
+		"test": "npm run test:node",
 		"test:node": "node --test test/*.test.js",
-		"setup-i18n": "node ./utils/setup-i18n.js",
 		"bundle": "node ./scripts/esbuild.bundle.mjs",
 		"package": "node ./scripts/package-vsix.mjs"
 	},

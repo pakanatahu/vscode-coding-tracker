@@ -7,6 +7,10 @@ const http = require('http');
 
 const { start } = require('../lib/StaticWebServer');
 
+function noop() {
+    return undefined;
+}
+
 test('static server returns local report summary json', async () => {
     const staticDir = fs.mkdtempSync(path.join(os.tmpdir(), 'coding-tracker-static-'));
     fs.writeFileSync(path.join(staticDir, 'index.html'), '<html><body>report</body></html>', 'utf8');
@@ -14,7 +18,7 @@ test('static server returns local report summary json', async () => {
     const server = start({
         staticDir,
         port: 0,
-        debugLog: () => {},
+        debugLog: noop,
         getReportSummary: async () => ({ totals: { totalMs: 1234 }, byActivity: [] })
     });
 
@@ -32,7 +36,7 @@ test('report route serves the fallback app shell', async () => {
     const server = start({
         staticDir,
         port: 0,
-        debugLog: () => {},
+        debugLog: noop,
         getReportSummary: async () => ({ totals: { totalMs: 1234 }, byActivity: [] })
     });
 
@@ -51,7 +55,7 @@ test('report route serves the desktop-style fallback dashboard shell', async () 
     const server = start({
         staticDir,
         port: 0,
-        debugLog: () => {},
+        debugLog: noop,
         getReportSummary: async () => ({ totals: {}, chart24h: {}, byActivity: [] })
     });
 
@@ -71,7 +75,7 @@ test('report route serves the chart footer breakdown toolbar', async () => {
     const server = start({
         staticDir,
         port: 0,
-        debugLog: () => {},
+        debugLog: noop,
         getReportSummary: async () => ({ totals: {}, chart24h: {}, byActivity: [] })
     });
 
@@ -90,7 +94,7 @@ test('report route serves the integrated desktop upgrade panel', async () => {
     const server = start({
         staticDir,
         port: 0,
-        debugLog: () => {},
+        debugLog: noop,
         getReportSummary: async () => ({ totals: {}, chart24h: {}, byActivity: [] })
     });
 
@@ -109,7 +113,7 @@ test('static server serves the chart.js vendor asset', async () => {
     const server = start({
         staticDir,
         port: 0,
-        debugLog: () => {},
+        debugLog: noop,
         getReportSummary: async () => ({ totals: { totalMs: 1234 }, byActivity: [] })
     });
 

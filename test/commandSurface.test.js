@@ -157,7 +157,6 @@ test('active runtime user-facing copy uses SlashCoded branding', () => {
     const files = [
         'lib/LocalServer.js',
         'lib/extensionMain.js',
-        'lib/commands/auth.js',
         'lib/Uploader.js',
         'lib/core/configuration.js',
         'lib/tracking/afkMonitor.js'
@@ -246,4 +245,59 @@ test('package files carry the first public settings surface version', () => {
     assert.equal(pkg.version, '0.11.0');
     assert.equal(lock.version, '0.11.0');
     assert.equal(lock.packages[''].version, '0.11.0');
+});
+
+test('marketplace metadata uses the public SlashCoded identity', () => {
+    const pkg = readJson('package.json');
+
+    assert.equal(pkg.name, 'slashcoded-vscode-extension');
+    assert.equal(pkg.displayName, 'SlashCoded');
+    assert.equal(pkg.publisher, 'lundholm');
+    assert.equal(pkg.icon, 'images/slashcoded.png');
+    assert.match(pkg.description, /^Track local VS Code activity/);
+    assert.doesNotMatch(pkg.description, /fork|cloud|upload token|computer id/i);
+});
+
+test('runtime dependencies stay limited to required packaged assets', () => {
+    const pkg = readJson('package.json');
+
+    assert.deepEqual(Object.keys(pkg.dependencies || {}).sort(), ['chart.js']);
+});
+
+test('output channel uses SlashCoded branding', () => {
+    const constants = readText('lib/Constants.js');
+
+    assert.match(constants, /outputChannelName:\s*'SlashCoded'/);
+    assert.doesNotMatch(constants, /outputChannelName:\s*'Coding Tracker'/);
+});
+
+test('bundled extension entrypoint cannot include legacy cloud runtime', () => {
+    const entrypoint = readText('extension.js');
+
+    assert.match(entrypoint, /require\('\.\/lib\/extensionMain'\)/);
+    assert.doesNotMatch(entrypoint, /extensionLegacy|CODING_TRACKER_USE_LEGACY/);
+});
+
+test('vsix packaging excludes source, workspace, and development-only files', () => {
+    const ignore = readText('.vscodeignore');
+    const excluded = [
+        '.github/**',
+        '.playwright-mcp/**',
+        '.multiterminal/**',
+        'lib/**',
+        'scripts/**',
+        'utils/**',
+        'node_modules/**',
+        '!node_modules/chart.js/dist/chart.umd.js',
+        'DEBUG_SIGN_FILE',
+        'package-lock.json'
+    ];
+
+    for (const pattern of excluded) {
+        assert.match(
+            ignore,
+            new RegExp(`(^|\\n)${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|\\n)`),
+            `expected .vscodeignore to contain ${pattern}`
+        );
+    }
 });

@@ -1,6 +1,3 @@
-/// <reference path="./vscode.d.ts/vscode.d.ts" />
-/// <reference path="./vscode.d.ts/vscode_namespace.d.ts" />
-
 type VCSCacheMap = {
 	[key: string]: {
 		cache: string;
@@ -27,11 +24,6 @@ type UploadObject = {
 	 * Project name
 	 */
 	proj: string;
-	/**
-	 * Computer ID
-	 */
-	pcid: string;
-
 	/**
 	 * Version Control System Information
 	 */
