@@ -257,7 +257,7 @@ Run: `node --test test/commandSurface.test.js`
 
 Expected: still FAIL because runtime command registrations and README still use old IDs/settings.
 
-- [ ] **Step 5: Commit manifest changes**
+- [x] **Step 5: Commit manifest changes**
 
 ```bash
 git add package.json package.nls.json package.nls.es.json package.nls.ru.json package.nls.zh-cn.json package.nls.zh-tw.json
@@ -272,7 +272,7 @@ git commit -m "feat: expose slashcoded settings and commands"
 - Modify: `lib/StatusBarManager.js`
 - Modify: `test/commandSurface.test.js`
 
-- [ ] **Step 1: Update command registrations**
+- [x] **Step 1: Update command registrations**
 
 Replace these command IDs in active modules:
 
@@ -289,7 +289,7 @@ In `lib/StatusBarManager.js`, the clickable status item currently points to a re
 statusBarItem.command = 'slashCoded.showSyncStatus';
 ```
 
-- [ ] **Step 2: Update tests for active command IDs**
+- [x] **Step 2: Update tests for active command IDs**
 
 In `test/commandSurface.test.js`, update assertions that read active runtime source:
 
@@ -312,7 +312,7 @@ assert.doesNotMatch(
 );
 ```
 
-- [ ] **Step 3: Run command surface tests**
+- [x] **Step 3: Run command surface tests**
 
 Run: `node --test test/commandSurface.test.js`
 

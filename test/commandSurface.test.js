@@ -168,6 +168,9 @@ test('sync status workflow and README avoid removed command labels', () => {
     assert.match(extensionMain, /Queue local history for Desktop ingestion/);
     assert.match(extensionMain, /Force upload queued events now/);
     assert.match(extensionMain, /Re-discover Desktop App/);
+    assert.match(extensionMain, /slashCoded\.showSyncStatus/);
+    assert.match(extensionMain, /slashCoded\.queueLocalHistoryForDesktop/);
+    assert.match(extensionMain, /slashCoded\.showOutput/);
     assert.match(extensionMain, /placeHolder: 'SlashCoded sync status'/);
 
     const removedLabels = [
@@ -185,6 +188,15 @@ test('sync status workflow and README avoid removed command labels', () => {
             `expected README to stop documenting removed command ${label}`
         );
     }
+
+    assert.doesNotMatch(
+        [
+            readText('lib/LocalServer.js'),
+            readText('lib/extensionMain.js'),
+            readText('lib/StatusBarManager.js')
+        ].join('\n'),
+        /registerCommand\('codingTracker\.|command = 'codingTracker\./
+    );
 });
 
 test('package metadata and changelog reflect the reduced SlashCoded command surface', () => {
