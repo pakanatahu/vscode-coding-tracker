@@ -721,7 +721,7 @@ Run: `node --test test/commandSurface.test.js`
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit docs and version bump**
+- [x] **Step 7: Commit docs and version bump**
 
 ```bash
 git add README.md CHANGELOG.md package.json package-lock.json test/commandSurface.test.js
@@ -735,7 +735,7 @@ git commit -m "docs: document slashcoded settings surface"
 - Generated/modify: `dist/package.contributes.json`
 - Generated: `SlashCoded-VSCode-Extension.0.11.0.vsix`
 
-- [ ] **Step 1: Run focused tests**
+- [x] **Step 1: Run focused tests**
 
 Run:
 
@@ -745,7 +745,7 @@ node --test test/commandSurface.test.js test/localStorageMode.test.js test/deskt
 
 Expected: PASS, all tests passing.
 
-- [ ] **Step 2: Run full Node test suite**
+- [x] **Step 2: Run full Node test suite**
 
 Run:
 
@@ -755,7 +755,7 @@ npm run test:node
 
 Expected: PASS, all Node tests passing.
 
-- [ ] **Step 3: Bundle**
+- [x] **Step 3: Bundle**
 
 Run:
 
@@ -765,7 +765,7 @@ npm run bundle
 
 Expected: exit code 0 and updated `dist/extension.js` plus `dist/package.contributes.json`.
 
-- [ ] **Step 4: Package**
+- [x] **Step 4: Package**
 
 Run:
 
@@ -779,7 +779,7 @@ Expected: exit code 0 and output:
 Packaged: SlashCoded-VSCode-Extension.0.11.0.vsix
 ```
 
-- [ ] **Step 5: Inspect generated contribution bundle**
+- [x] **Step 5: Inspect generated contribution bundle**
 
 Run:
 
@@ -807,7 +807,7 @@ Expected output includes only:
 ]
 ```
 
-- [ ] **Step 6: Commit generated bundle**
+- [x] **Step 6: Commit generated bundle**
 
 ```bash
 git add dist/extension.js dist/package.contributes.json SlashCoded-VSCode-Extension.0.11.0.vsix

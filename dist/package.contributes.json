@@ -1,122 +1,69 @@
 {
   "configuration": {
     "type": "object",
-    "title": "Coding Tracker configuration",
+    "title": "SlashCoded",
     "properties": {
-      "codingTracker.connectionMode": {
-        "type": "string",
-        "enum": [
-          "desktop",
-          "cloud"
-        ],
-        "default": "desktop",
-        "description": "Connection mode: 'desktop' sends events to the SlashCoded desktop Local API on localhost; 'cloud' sends them to the legacy cloud ingest service."
-      },
-      "codingTracker.uploadToken": {
-        "type": "string",
-        "default": "",
-        "description": "%cfg.uploadToken%"
-      },
-      "codingTracker.computerId": {
-        "type": "string",
-        "default": "",
-        "description": "%cfg.computerId%"
-      },
-      "codingTracker.localServerMode": {
+      "slashCoded.showStatus": {
         "type": "boolean",
         "default": true,
-        "description": "%cfg.localServerMode%"
+        "description": "Show the SlashCoded status bar item."
       },
-      "codingTracker.moreThinkingTime": {
-        "type": "number",
-        "default": 0,
-        "description": "%cfg.moreThinkingTime%"
-      },
-      "codingTracker.showStatus": {
+      "slashCoded.shouldTrackTerminal": {
         "type": "boolean",
         "default": true,
-        "description": "%cfg.showStatus%"
+        "description": "Include terminal activity events."
       },
-      "codingTracker.proxy": {
-        "type": [
-          "string",
-          "boolean"
-        ],
-        "default": "auto",
-        "enum": [
-          "auto",
-          "no-proxy",
-          false
-        ],
-        "description": "%cfg.proxy%"
-      },
-      "codingTracker.shouldTrackTerminal": {
+      "slashCoded.shouldTrackAIChat": {
         "type": "boolean",
         "default": true,
-        "description": "Enable or disable tracking of terminal activity."
+        "description": "Include AI chat activity events."
       },
-      "codingTracker.shouldTrackAIChat": {
+      "slashCoded.afkEnabled": {
         "type": "boolean",
         "default": true,
-        "description": "Enable or disable tracking of AI chat (Copilot Chat, AIChat, etc.) activity."
+        "description": "Pause or classify tracking when VS Code is idle."
       },
-      "codingTracker.functionKey": {
-        "type": "string",
-        "default": "",
-        "description": "Azure Function key for authenticated upload endpoints (if required)."
-      },
-      "codingTracker.overrideOrigin": {
-        "type": "string",
-        "default": "",
-        "description": "Override Origin header (defaults to vscode-extension://<publisher>.<name>)."
-      },
-      "codingTracker.afkEnabled": {
-        "type": "boolean",
-        "default": true,
-        "description": "Enable AFK detection and pause/resume tracking automatically."
-      },
-      "codingTracker.afkTimeoutMinutes": {
-        "type": "number",
-        "default": 15,
-        "minimum": 1,
-        "maximum": 180,
-        "description": "Minutes of inactivity before entering AFK mode."
-      },
-      "codingTracker.uploadTimeoutMs": {
+      "slashCoded.uploadTimeoutMs": {
         "type": "number",
         "default": 15000,
-        "description": "Timeout in milliseconds for each upload request (default 15000)."
+        "minimum": 1000,
+        "description": "Timeout in milliseconds for local SlashCoded Desktop upload requests."
       },
-      "codingTracker.desktopDiscoveryTimeoutMs": {
+      "slashCoded.desktopDiscoveryTimeoutMs": {
         "type": "number",
         "default": 500,
-        "description": "Timeout in milliseconds for desktop app discovery handshake (default 500)."
+        "minimum": 100,
+        "description": "Timeout in milliseconds for SlashCoded Desktop discovery handshakes."
       },
-      "codingTracker.forceLocalFallback": {
-        "type": "boolean",
-        "default": false,
-        "description": "Force local-only fallback storage and report behavior even when Slashcoded Desktop is detected. Useful for testing the built-in local dashboard."
+      "slashCoded.storageMode": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "standalone"
+        ],
+        "default": "auto",
+        "description": "Storage mode: 'auto' uses SlashCoded Desktop when detected and local history otherwise; 'standalone' always uses the built-in local dashboard."
       }
     }
   },
   "commands": [
     {
-      "command": "codingTracker.showLocalReport",
+      "command": "slashCoded.showLocalReport",
       "title": "SlashCoded: Show Local Report",
       "category": "SlashCoded"
     },
     {
-      "command": "codingTracker.showSyncStatus",
+      "command": "slashCoded.showSyncStatus",
       "title": "SlashCoded: Show Sync Status",
       "category": "SlashCoded"
     },
     {
-      "command": "codingTracker.queueLocalHistoryForDesktop",
+      "command": "slashCoded.queueLocalHistoryForDesktop",
       "title": "SlashCoded: Import Local History into Desktop",
       "category": "SlashCoded"
     },
     {
-      "command": "codingTracker.showOutput",
+      "command": "slashCoded.showOutput",
       "title": "SlashCoded: Show Output Channel",
       "category": "SlashCoded"
     }

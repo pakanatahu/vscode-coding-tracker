@@ -15046,7 +15046,7 @@ var require_StatusBarManager = __commonJS({
       if (!statusBarItem && enable) {
         statusBarItem = vscode.window.createStatusBarItem();
         try {
-          statusBarItem.command = "codingTracker.flushUploads";
+          statusBarItem.command = "slashCoded.showSyncStatus";
         } catch (_) {
         }
       }
@@ -16145,7 +16145,7 @@ var require_LocalServer = __commonJS({
     function init(extensionContext) {
       var { subscriptions } = extensionContext;
       storagePath = extensionContext && extensionContext.globalStorageUri ? extensionContext.globalStorageUri.fsPath : "";
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.showLocalReport", showLocalReport));
+      subscriptions.push(vscode.commands.registerCommand("slashCoded.showLocalReport", showLocalReport));
       try {
         log.debug("[LocalServer] Commands registered: showLocalReport");
       } catch (_) {
@@ -16186,19 +16186,6 @@ var require_LocalServer = __commonJS({
     }
     function updateConfig() {
       var newConfig = _readUserConfig();
-      if (isLocalServerRunningInThisContext) {
-        var shouldToastReloadVSCode = false;
-        if (userConfig.localMode) {
-          if (userConfig.token != newConfig.token || userConfig.url != newConfig.url || newConfig.localMode == false)
-            shouldToastReloadVSCode = true;
-        } else if (newConfig.localMode == true) {
-          shouldToastReloadVSCode = true;
-        }
-        log.debug(`[ConfigChanged]: please reload vscode to apply it.`);
-        shouldToastReloadVSCode && vscode.window.showInformationMessage(
-          `SlashCoded: detected your local server configurations changed. Please reload VSCode to apply.`
-        );
-      }
       userConfig = newConfig;
     }
     function startLocalServer(silent) {
@@ -16362,23 +16349,8 @@ var require_LocalServer = __commonJS({
       return `${userConfig.url}/ajax/kill`;
     }
     function _readUserConfig() {
-      var configurations = ext.getConfig("codingTracker"), token = String(configurations.get("uploadToken")), url = String(configurations.get("serverURL")), localMode = Boolean(configurations.get("localServerMode"));
-      try {
-        const { isDebugMode } = require_Constants();
-        if (isDebugMode) {
-          const hasUrl = !!url;
-          const hasToken = !!token;
-          const hasLocalMode = configurations.get("localServerMode") !== void 0;
-          if (!hasLocalMode && !hasUrl && !hasToken) {
-            url = `http://127.0.0.1:${DEFAULT_PORT}`;
-            token = "dev";
-            localMode = true;
-          }
-        }
-      } catch (_) {
-      }
-      url = url.endsWith("/") ? url.slice(0, -1) : url;
-      return { url, token, localMode };
+      ext.getConfig("slashCoded");
+      return { url: `http://127.0.0.1:${DEFAULT_PORT}`, token: "", localMode: false };
     }
     function _showError(errOneLine, errObject) {
       const MENU_ITEM_TEXT = "Show details";
@@ -16427,9 +16399,8 @@ ${errObject.stack}`);
 var require_storageMode = __commonJS({
   "lib/localReport/storageMode.js"(exports2, module2) {
     function shouldQueueLiveEvents(input) {
-      if (input && input.forceLocalFallback) return false;
-      const connectionMode = input && input.connectionMode ? input.connectionMode : "desktop";
-      if (connectionMode !== "desktop") return true;
+      const storageMode = input && input.storageMode === "standalone" ? "standalone" : "auto";
+      if (storageMode === "standalone") return false;
       const discovery = input && input.discovery ? input.discovery : null;
       return !!(discovery && (discovery.apiBaseUrl || discovery.publicBaseUrl));
     }
@@ -16509,7 +16480,7 @@ var require_desktopEventMapper = __commonJS({
       const segmentEndTs = safeStartTs + longMs;
       const durationMinutes = Math.max(1, Math.round(longMs / (60 * 1e3)));
       const category = src && src.type ? src.type : "code";
-      const project = src && (src.proj || src.pcid) || "vscode-local";
+      const project = src && src.proj || "vscode-local";
       const eventSeed = [
         category,
         safeStartTs,
@@ -16545,204 +16516,6 @@ var require_desktopEventMapper = __commonJS({
     }
     module2.exports = {
       mapToDesktopEvent
-    };
-  }
-});
-
-// package.json
-var require_package = __commonJS({
-  "package.json"(exports2, module2) {
-    module2.exports = {
-      name: "vscode-coding-tracker-fork",
-      displayName: "Slashcoded Coding tracker",
-      description: "Integrates VS Code with the SlashCoded desktop app (lundholm.io/project/slashcoded) to track coding time, file edits, terminal sessions, AI chats, AFK, and sync status through the local report, sync status, history import, and output commands.",
-      version: "0.10.4",
-      type: "commonjs",
-      license: "GPL-3.0",
-      publisher: "lundholm",
-      author: "pakanatahu",
-      icon: "images/slashcoded.png",
-      engines: {
-        vscode: "^1.1.0",
-        node: ">=22.0.0"
-      },
-      categories: [
-        "Other"
-      ],
-      activationEvents: [
-        "onStartupFinished"
-      ],
-      extensionKind: [
-        "ui",
-        "workspace"
-      ],
-      main: "./dist/extension.js",
-      dependencies: {
-        axios: "^1.7.7",
-        "chart.js": "^4.5.1",
-        "tree-kill": "^1.2.2",
-        uuid: "^8.3.2",
-        "vscode-coding-tracker-server": "^0.6.0"
-      },
-      devDependencies: {
-        "@types/node": "^22",
-        "@types/vscode": "*",
-        "@vscode/vsce": "^2.22.0",
-        esbuild: "^0.25.10",
-        typescript: "^5.8.3"
-      },
-      optionalDependencies: {
-        "@typescript-eslint/eslint-plugin": "^5.4.0",
-        "@typescript-eslint/parser": "^5.4.0",
-        eslint: "^8.2.0"
-      },
-      contributes: {
-        configuration: {
-          type: "object",
-          title: "Coding Tracker configuration",
-          properties: {
-            "codingTracker.connectionMode": {
-              type: "string",
-              enum: [
-                "desktop",
-                "cloud"
-              ],
-              default: "desktop",
-              description: "Connection mode: 'desktop' sends events to the SlashCoded desktop Local API on localhost; 'cloud' sends them to the legacy cloud ingest service."
-            },
-            "codingTracker.uploadToken": {
-              type: "string",
-              default: "",
-              description: "%cfg.uploadToken%"
-            },
-            "codingTracker.computerId": {
-              type: "string",
-              default: "",
-              description: "%cfg.computerId%"
-            },
-            "codingTracker.localServerMode": {
-              type: "boolean",
-              default: true,
-              description: "%cfg.localServerMode%"
-            },
-            "codingTracker.moreThinkingTime": {
-              type: "number",
-              default: 0,
-              description: "%cfg.moreThinkingTime%"
-            },
-            "codingTracker.showStatus": {
-              type: "boolean",
-              default: true,
-              description: "%cfg.showStatus%"
-            },
-            "codingTracker.proxy": {
-              type: [
-                "string",
-                "boolean"
-              ],
-              default: "auto",
-              enum: [
-                "auto",
-                "no-proxy",
-                false
-              ],
-              description: "%cfg.proxy%"
-            },
-            "codingTracker.shouldTrackTerminal": {
-              type: "boolean",
-              default: true,
-              description: "Enable or disable tracking of terminal activity."
-            },
-            "codingTracker.shouldTrackAIChat": {
-              type: "boolean",
-              default: true,
-              description: "Enable or disable tracking of AI chat (Copilot Chat, AIChat, etc.) activity."
-            },
-            "codingTracker.functionKey": {
-              type: "string",
-              default: "",
-              description: "Azure Function key for authenticated upload endpoints (if required)."
-            },
-            "codingTracker.overrideOrigin": {
-              type: "string",
-              default: "",
-              description: "Override Origin header (defaults to vscode-extension://<publisher>.<name>)."
-            },
-            "codingTracker.afkEnabled": {
-              type: "boolean",
-              default: true,
-              description: "Enable AFK detection and pause/resume tracking automatically."
-            },
-            "codingTracker.afkTimeoutMinutes": {
-              type: "number",
-              default: 15,
-              minimum: 1,
-              maximum: 180,
-              description: "Minutes of inactivity before entering AFK mode."
-            },
-            "codingTracker.uploadTimeoutMs": {
-              type: "number",
-              default: 15e3,
-              description: "Timeout in milliseconds for each upload request (default 15000)."
-            },
-            "codingTracker.desktopDiscoveryTimeoutMs": {
-              type: "number",
-              default: 500,
-              description: "Timeout in milliseconds for desktop app discovery handshake (default 500)."
-            },
-            "codingTracker.forceLocalFallback": {
-              type: "boolean",
-              default: false,
-              description: "Force local-only fallback storage and report behavior even when Slashcoded Desktop is detected. Useful for testing the built-in local dashboard."
-            }
-          }
-        },
-        commands: [
-          {
-            command: "codingTracker.showLocalReport",
-            title: "SlashCoded: Show Local Report",
-            category: "SlashCoded"
-          },
-          {
-            command: "codingTracker.showSyncStatus",
-            title: "SlashCoded: Show Sync Status",
-            category: "SlashCoded"
-          },
-          {
-            command: "codingTracker.queueLocalHistoryForDesktop",
-            title: "SlashCoded: Import Local History into Desktop",
-            category: "SlashCoded"
-          },
-          {
-            command: "codingTracker.showOutput",
-            title: "SlashCoded: Show Output Channel",
-            category: "SlashCoded"
-          }
-        ]
-      },
-      repository: {
-        type: "git",
-        url: "https://github.com/pakanatahu/vscode-coding-tracker"
-      },
-      bugs: {
-        url: "https://github.com/pakanatahu/vscode-coding-tracker/issues"
-      },
-      homepage: "https://github.com/pakanatahu/vscode-coding-tracker#readme",
-      scripts: {
-        "install-vscode-dts": "node ./lib/vscode.d.ts/FETCH.js",
-        start: "./node_modules/.bin/coding-tracker-server",
-        test: "npm run setup-i18n",
-        "test:node": "node --test test/*.test.js",
-        "setup-i18n": "node ./utils/setup-i18n.js",
-        bundle: "node ./scripts/esbuild.bundle.mjs",
-        package: "node ./scripts/package-vsix.mjs"
-      },
-      keywords: [
-        "vscode",
-        "record",
-        "report",
-        "multi-root ready"
-      ]
     };
   }
 });
@@ -16804,7 +16577,6 @@ var require_Uploader = __commonJS({
     var TRUST_ENROLL_MIN_INTERVAL_MS = 60 * 1e3;
     var ENFORCEMENT_REFRESH_MS = 6e4;
     var DESKTOP_ENDPOINT_CANDIDATES = ["api/upload", "api/queue/upload"];
-    var CLOUD_ENDPOINT_CANDIDATES = ["api/upload", "api/queue/upload", "ajax/upload", "upload", "api/track", "track"];
     var Q = [];
     var uploadURL = "";
     var uploadToken = "";
@@ -16836,8 +16608,7 @@ var require_Uploader = __commonJS({
     var queueWarned = false;
     var machineId = "";
     var desktopWarned = false;
-    var connectionMode = "desktop";
-    var forceLocalFallback = false;
+    var storageMode = "auto";
     var enforcementMode = null;
     var lastEnforcementCheckAt = 0;
     var deadLetterFilePath = "";
@@ -17011,13 +16782,12 @@ var require_Uploader = __commonJS({
       set: function(url, token, proxy) {
         try {
           const parsed = new URL(url);
-          const allCandidates = Array.from(new Set(DESKTOP_ENDPOINT_CANDIDATES.concat(CLOUD_ENDPOINT_CANDIDATES)));
-          const clean = allCandidates.reduce((acc, c) => acc.endsWith(c) ? acc.slice(0, -c.length) : acc, parsed.toString());
+          const clean = DESKTOP_ENDPOINT_CANDIDATES.reduce((acc, c) => acc.endsWith(c) ? acc.slice(0, -c.length) : acc, parsed.toString());
           baseServerURL = clean.replace(/\/?$/, "/");
         } catch (_) {
           baseServerURL = url.endsWith("/") ? url : url + "/";
         }
-        baseServerURL = normalizeApiBase(baseServerURL, connectionMode === "desktop");
+        baseServerURL = normalizeApiBase(baseServerURL);
         fallbackBaseServerURL = baseServerURL;
         currentEndpointIndex = 0;
         uploadURL = baseServerURL + endpointCandidates[currentEndpointIndex];
@@ -17038,25 +16808,10 @@ var require_Uploader = __commonJS({
           handshakeTimeoutMs = ms;
         }
       },
-      /** @param {'desktop'|'cloud'} mode */
-      setConnectionMode: function(mode) {
-        if (mode === "desktop" || mode === "cloud") {
-          connectionMode = mode;
-          endpointCandidates = (mode === "desktop" ? DESKTOP_ENDPOINT_CANDIDATES : CLOUD_ENDPOINT_CANDIDATES).slice();
-          baseServerURL = normalizeApiBase(baseServerURL, mode === "desktop");
-          fallbackBaseServerURL = normalizeApiBase(fallbackBaseServerURL, mode === "desktop");
-          currentEndpointIndex = 0;
-          if (baseServerURL) uploadURL = ensureTrailingSlash(baseServerURL) + endpointCandidates[currentEndpointIndex];
-          try {
-            log.debug(`uploader connectionMode set to ${mode}`);
-          } catch (_) {
-          }
-        }
-      },
-      setForceLocalFallback: function(enabled) {
-        forceLocalFallback = !!enabled;
+      setStorageMode: function(mode) {
+        storageMode = mode === "standalone" ? "standalone" : "auto";
         try {
-          log.debug(`uploader forceLocalFallback set to ${forceLocalFallback}`);
+          log.debug(`uploader storageMode set to ${storageMode}`);
         } catch (_) {
         }
       },
@@ -17078,7 +16833,7 @@ var require_Uploader = __commonJS({
         if (queuePayloads.length > 1) {
           log.debug(`uploader: split payload into ${queuePayloads.length} shared-timing chunks (${payload.long}ms total)`);
         }
-        if (!shouldQueueLiveEvents({ connectionMode, discovery, forceLocalFallback })) {
+        if (!shouldQueueLiveEvents({ storageMode, discovery })) {
           const persistedPayloads = queuePayloads.map((queuedPayload) => normalizePayload(queuedPayload));
           if (historyStore) {
             historyStore.appendMany(persistedPayloads).catch((error) => {
@@ -17205,11 +16960,7 @@ var require_Uploader = __commonJS({
         // 4xx/5xx bodies instead of throwing.
         validateStatus: () => true
       };
-      if (connectionMode === "cloud" && tokenInfo && tokenInfo.token) {
-        if (!uploadOptions.headers) uploadOptions.headers = {};
-        uploadOptions.headers["Authorization"] = `Bearer ${tokenInfo.token}`;
-      }
-      const isDesktopUploadEndpoint = connectionMode === "desktop" && /api\/(?:queue\/)?upload/.test(uploadURL);
+      const isDesktopUploadEndpoint = /api\/(?:queue\/)?upload/.test(uploadURL);
       if (isDesktopUploadEndpoint) {
         const desktopEvent = mapToDesktopEvent(sendData, item.trackingConfig || trackingConfig);
         uploadOptions.data = JSON.stringify({ events: [desktopEvent] });
@@ -17224,8 +16975,7 @@ var require_Uploader = __commonJS({
           return;
         }
       } else if (isAPIStyle) {
-        if (/api\/(?:queue\/)?upload/.test(uploadURL)) uploadOptions.data = JSON.stringify({ events: [sendData] });
-        else uploadOptions.data = JSON.stringify(sendData);
+        uploadOptions.data = JSON.stringify(sendData);
       } else {
         const params = new URLSearchParams();
         Object.entries(
@@ -17235,22 +16985,6 @@ var require_Uploader = __commonJS({
           if (v !== void 0) params.append(k, String(v));
         });
         uploadOptions.data = params.toString();
-      }
-      try {
-        const cfg = ext.getConfig("codingTracker");
-        const functionKey = cfg.get("functionKey");
-        const overrideOrigin = cfg.get("overrideOrigin");
-        const pkg = require_package();
-        const extensionId = `${pkg.publisher}.${pkg.name}`;
-        const origin = overrideOrigin && overrideOrigin.trim() || `vscode-extension://${extensionId}`;
-        if (!uploadOptions.headers) uploadOptions.headers = {};
-        uploadOptions.headers["Origin"] = origin;
-        if (functionKey) uploadOptions.headers["x-functions-key"] = functionKey;
-      } catch (e) {
-        try {
-          log.debug("Header injection failed: " + JSON.stringify(e));
-        } catch (inner) {
-        }
       }
       if (typeof uploadProxy !== "undefined") {
         if (uploadProxy === false || uploadProxy === "no-proxy") {
@@ -17293,15 +17027,11 @@ ${dump}`);
           if (status === 403 && enforceActive && trustedSigned && shouldSignTrustedUpload(uploadURL)) {
             await clearTrustedSource("trusted-rejected", true);
           }
-          if (status === 403 && tokenInfo && connectionMode === "cloud") {
-            await handleTokenFailure(statusText || "Forbidden");
-          }
         } else if (status === 401) {
           success = false;
           if (enforcementMode === "enforce" && trustedSigned && shouldSignTrustedUpload(uploadURL)) {
             await clearTrustedSource("trusted-unauthorized", true);
           }
-          if (connectionMode === "cloud") await handleTokenFailure(statusText || "Unauthorized");
         } else if (status === 404) {
           const prev = uploadURL;
           if (currentEndpointIndex < endpointCandidates.length - 1) {
@@ -17360,16 +17090,6 @@ ${dump}`);
     }
     async function ensureDesktopReady() {
       const now = Date.now();
-      if (connectionMode === "cloud") {
-        baseServerURL = normalizeApiBase(baseServerURL || fallbackBaseServerURL || "", false);
-        if (!baseServerURL) {
-          syncOnline = false;
-          updateSyncState("No cloud endpoint configured");
-          return false;
-        }
-        uploadURL = baseServerURL + endpointCandidates[currentEndpointIndex];
-        return true;
-      }
       if (!discovery || now - lastHandshakeAt > HANDSHAKE_MIN_INTERVAL_MS) {
         await discoverDesktop(false);
       }
@@ -17379,8 +17099,7 @@ ${dump}`);
         return false;
       }
       baseServerURL = normalizeApiBase(
-        discovery.apiBaseUrl || discovery.publicBaseUrl || baseServerURL || fallbackBaseServerURL || "",
-        true
+        discovery.apiBaseUrl || discovery.publicBaseUrl || baseServerURL || fallbackBaseServerURL || ""
       );
       uploadURL = baseServerURL + endpointCandidates[currentEndpointIndex];
       await fetchTrackingConfig(false);
@@ -17461,7 +17180,6 @@ ${dump}`);
       return null;
     }
     async function fetchTrackingConfig(force) {
-      if (connectionMode !== "desktop") return trackingConfig;
       const now = Date.now();
       if (!force && !shouldRefreshTrackingConfig(lastTrackingConfigFetchAt, now)) return trackingConfig;
       const base = baseServerURL || fallbackBaseServerURL;
@@ -17492,10 +17210,9 @@ ${dump}`);
       if (!url) return "";
       return url.endsWith("/") ? url : url + "/";
     }
-    function normalizeApiBase(url, desktopMode) {
+    function normalizeApiBase(url) {
       const base = ensureTrailingSlash(url || "");
       if (!base) return "";
-      if (!desktopMode) return base;
       try {
         const parsed = new URL(base);
         const normalizedPath = (parsed.pathname || "/").replace(/\/+$/, "");
@@ -17734,10 +17451,6 @@ ${dump}`);
       return false;
     }
     async function refreshEnforcementModeIfNeeded() {
-      if (connectionMode !== "desktop") {
-        enforcementMode = null;
-        return null;
-      }
       const now = Date.now();
       if (enforcementMode && now - lastEnforcementCheckAt < ENFORCEMENT_REFRESH_MS) return enforcementMode;
       const base = baseServerURL || fallbackBaseServerURL;
@@ -17757,7 +17470,6 @@ ${dump}`);
       return enforcementMode;
     }
     function shouldSignTrustedUpload(targetUrl) {
-      if (connectionMode !== "desktop") return false;
       try {
         const u = new URL(targetUrl);
         return /^\/api\/(?:queue\/)?upload\/?$/i.test(u.pathname || "");
@@ -17806,18 +17518,6 @@ ${bodyHash}`;
       options.headers["X-Sc-Nonce"] = nonce;
       options.headers["X-Sc-Signature"] = signature;
       return true;
-    }
-    async function handleTokenFailure(message) {
-      try {
-        log.debug("Auth failure, clearing token:", message);
-      } catch (_) {
-      }
-      await clearToken("auth-failed");
-      try {
-        vscode.window.showWarningMessage("SlashCoded: Desktop token invalid or expired. Requesting a new one...");
-      } catch (_) {
-      }
-      await requestNewToken();
     }
     function normalizePayload(data) {
       const send = Object.assign({}, data);
@@ -18182,7 +17882,6 @@ var require_UploadObject = __commonJS({
       lang: "",
       file: "",
       proj: "",
-      pcid: "",
       vcs_type: "",
       vcs_repo: "",
       vcs_branch: "",
@@ -18192,9 +17891,9 @@ var require_UploadObject = __commonJS({
       r2: ""
     };
     module2.exports = { init, generateOpen, generateCode, generateTerminal, generateChat };
-    function init(computerId) {
+    function init() {
       lastActiveProject = vscode.workspace.rootPath || UNKNOWN;
-      baseUploadObject.pcid = computerId;
+      return baseUploadObject;
     }
     function generateOpen(activeDocument, time, long) {
       return generate("open", activeDocument, time, long);
@@ -20333,63 +20032,11 @@ var require_configuration = __commonJS({
     var runtime = require_runtime();
     var { DEFAULT_IDLE_THRESHOLD_SECONDS } = require_hostTiming();
     async function updateConfigurations(deps) {
-      const { vscode, ext, uploader, log, statusBar, localServer, uploadObject, state, activationContext, applyAfkConfig } = deps;
-      const extensionCfg = ext.getConfig("codingTracker");
-      const sanitize = (v) => v === void 0 || v === null || v === "undefined" ? "" : String(v);
-      const uploadTokenRaw = extensionCfg.get("uploadToken");
-      const connectionModeRaw = extensionCfg.get("connectionMode");
-      const forceLocalFallback = extensionCfg.get("forceLocalFallback") === true;
-      const computerId = sanitize(extensionCfg.get("computerId"));
+      const { ext, uploader, log, statusBar, localServer, uploadObject, state, applyAfkConfig } = deps;
+      const extensionCfg = ext.getConfig("slashCoded");
+      const storageMode = extensionCfg.get("storageMode") === "standalone" ? "standalone" : "auto";
       const enableStatusBar = extensionCfg.get("showStatus");
-      const mttRaw = extensionCfg.get("moreThinkingTime");
-      let mtt = 0;
-      if (typeof mttRaw === "number") mtt = mttRaw;
-      else if (typeof mttRaw === "string") {
-        const parsed = parseInt(mttRaw, 10);
-        if (!isNaN(parsed)) mtt = parsed;
-      }
-      const uploadTokenCfg = sanitize(uploadTokenRaw);
-      let uploadToken = "";
-      try {
-        if (activationContext && activationContext.secrets) {
-          const secret = await activationContext.secrets.get("codingTracker.uploadToken");
-          if (secret && secret.trim()) {
-            uploadToken = secret.trim();
-          } else if (uploadTokenCfg) {
-            await activationContext.secrets.store("codingTracker.uploadToken", uploadTokenCfg);
-            uploadToken = uploadTokenCfg;
-            try {
-              await vscode.workspace.getConfiguration("codingTracker").update("uploadToken", "", vscode.ConfigurationTarget.Global);
-              await vscode.workspace.getConfiguration("codingTracker").update("uploadToken", "", vscode.ConfigurationTarget.Workspace);
-            } catch (_) {
-            }
-            try {
-              vscode.window.showInformationMessage("SlashCoded: Upload token migrated to secure storage.");
-            } catch (_) {
-            }
-          }
-        } else {
-          uploadToken = uploadTokenCfg;
-        }
-      } catch (e) {
-        uploadToken = uploadTokenCfg;
-        try {
-          log.debug("[secrets] failed to read/migrate secret token", e);
-        } catch (_) {
-        }
-      }
-      let connectionMode = "desktop";
-      if (typeof connectionModeRaw === "string") {
-        const lower = connectionModeRaw.toLowerCase();
-        if (lower === "cloud" || lower === "desktop") connectionMode = /** @type {'desktop'|'cloud'} */
-        lower;
-      }
-      const configuredServer = connectionMode === "cloud" ? runtime.INGEST_BASE : `http://127.0.0.1:${process.env.SLASHCODED_DESKTOP_PORT || 5292}/`;
-      const httpCfg = ext.getConfig("http");
-      const baseHttpProxy = httpCfg ? httpCfg.get("proxy") : void 0;
-      const overwriteHttpProxy = extensionCfg.get("proxy");
-      const { getProxyConfiguration } = require_GetProxyConfiguration();
-      const proxy = getProxyConfiguration(baseHttpProxy, overwriteHttpProxy);
+      const configuredServer = `http://127.0.0.1:${process.env.SLASHCODED_DESKTOP_PORT || 5292}/`;
       state.trackTerminal = extensionCfg.get("shouldTrackTerminal") !== false;
       state.trackAIChat = extensionCfg.get("shouldTrackAIChat") !== false;
       const afkEnabled = extensionCfg.get("afkEnabled") !== false;
@@ -20397,19 +20044,12 @@ var require_configuration = __commonJS({
       const afkTimeoutMs = idleThresholdSeconds * runtime.SECOND;
       state.trackAFK = afkEnabled;
       state.afkTimeoutMs = afkTimeoutMs;
-      if (isNaN(mtt)) mtt = 0;
-      if (mtt < -15 * runtime.SECOND) mtt = -15 * runtime.SECOND;
-      state.moreThinkingTimeMs = mtt;
-      uploader.set(configuredServer, uploadToken, proxy);
+      state.moreThinkingTimeMs = 0;
+      uploader.set(configuredServer, "", void 0);
       try {
-        uploader.setConnectionMode(connectionMode);
+        uploader.setStorageMode(storageMode);
       } catch (e) {
-        log.debug("Failed to set connectionMode on uploader", e);
-      }
-      try {
-        uploader.setForceLocalFallback(forceLocalFallback);
-      } catch (e) {
-        log.debug("Failed to set forceLocalFallback on uploader", e);
+        log.debug("Failed to set storageMode on uploader", e);
       }
       const timeoutCfgRaw = extensionCfg.get("uploadTimeoutMs");
       if (typeof timeoutCfgRaw === "number") {
@@ -20447,7 +20087,7 @@ var require_configuration = __commonJS({
           }
         }
       }
-      uploadObject.init(computerId || `unknown-${require("os").platform()}`);
+      uploadObject.init();
       localServer.updateConfig();
       statusBar.init(enableStatusBar);
       try {
@@ -22089,8 +21729,8 @@ var require_extensionMain = __commonJS({
           }
         }
       };
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.showSyncStatus", () => showSyncStatus()));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.queueLocalHistoryForDesktop", async () => {
+      subscriptions.push(vscode.commands.registerCommand("slashCoded.showSyncStatus", () => showSyncStatus()));
+      subscriptions.push(vscode.commands.registerCommand("slashCoded.queueLocalHistoryForDesktop", async () => {
         try {
           const result = await uploader.queueLocalHistoryForDesktop();
           const importedCount = result && typeof result.importedCount === "number" ? result.importedCount : 0;
@@ -22099,7 +21739,7 @@ var require_extensionMain = __commonJS({
           log.error(e);
         }
       }));
-      subscriptions.push(vscode.commands.registerCommand("codingTracker.showOutput", () => {
+      subscriptions.push(vscode.commands.registerCommand("slashCoded.showOutput", () => {
         try {
           require_OutputChannelLog().show();
         } catch (_) {
