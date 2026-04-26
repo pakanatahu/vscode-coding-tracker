@@ -21,7 +21,7 @@ test('dashboard renderer includes other summary copy for hidden rows', () => {
 test('dashboard header includes SlashCoded brand and Desktop link', () => {
     assert.match(indexHtml, /\/assets\/slashcoded\.png/);
     assert.equal(fs.existsSync('server-app/assets/slashcoded.png'), true);
-    assert.match(indexHtml, /SLASHCODED \| VSCode Built-In Dashboard/);
+    assert.match(indexHtml, /SLASHCODED \| VS Code Built-In Dashboard/);
     assert.match(indexHtml, /https:\/\/lundholm\.io\/projects\/slashcoded\?ref=vscodeext/);
     assert.match(indexHtml, /Get SlashCoded Desktop/);
 });

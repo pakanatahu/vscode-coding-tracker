@@ -274,9 +274,9 @@ test('package files carry the first public settings surface version', () => {
     const pkg = readJson('package.json');
     const lock = readJson('package-lock.json');
 
-    assert.equal(pkg.version, '0.11.0');
-    assert.equal(lock.version, '0.11.0');
-    assert.equal(lock.packages[''].version, '0.11.0');
+    assert.equal(pkg.version, '0.12.0');
+    assert.equal(lock.version, '0.12.0');
+    assert.equal(lock.packages[''].version, '0.12.0');
 });
 
 test('marketplace metadata uses the public SlashCoded identity', () => {
@@ -284,9 +284,9 @@ test('marketplace metadata uses the public SlashCoded identity', () => {
 
     assert.equal(pkg.name, 'slashcoded-vscode-extension');
     assert.equal(pkg.displayName, 'SlashCoded');
-    assert.equal(pkg.publisher, 'lundholm');
+    assert.equal(pkg.publisher, 'DavidLundholm');
     assert.equal(pkg.icon, 'images/slashcoded.png');
-    assert.match(pkg.description, /^Track your coding activity in VSCode/);
+    assert.match(pkg.description, /^Track coding activity in VS Code/);
     assert.doesNotMatch(pkg.description, /fork|cloud|upload token|computer id/i);
 });
 

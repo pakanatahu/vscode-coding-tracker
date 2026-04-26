@@ -83,7 +83,7 @@ test('report route serves the polished dashboard shell without inert chart toolb
         await waitForServer(server);
         const html = await httpGetText(`${server.url}/report/`);
         assert.match(html, /theme-toggle/);
-        assert.match(html, /SLASHCODED \| VSCode Built-In Dashboard/);
+        assert.match(html, /SLASHCODED \| VS Code Built-In Dashboard/);
         assert.match(html, /By repository branch/);
         assert.match(html, /By language/);
         assert.doesNotMatch(html, /Break down by/);

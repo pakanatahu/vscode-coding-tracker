@@ -7,6 +7,8 @@
 - Updated README image paths and logo sizing so GitHub and Marketplace previews render correctly.
 - Added contributor documentation and a focused contributor issue list for localization and Secondary Side Bar AI chat tracking improvements.
 - Removed the generated VSIX from Git tracking; future VSIX packages are local build artifacts and remain ignored by `.gitignore`.
+- Fixed the Marketplace publisher ID to `DavidLundholm` so the extension can be published under the correct publisher account.
+- Tightened Marketplace-facing metadata and README wording to describe Desktop integration without promotional download language.
 
 ## 0.11.0
 

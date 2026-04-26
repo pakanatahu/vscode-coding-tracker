@@ -1,11 +1,11 @@
 {
 	"name": "slashcoded-vscode-extension",
 	"displayName": "SlashCoded",
-	"description": "Track your coding activity in VSCode, visualize your activity in the built-in standalone dashboard or download the free SlashCoded Desktop app for richer analytics",
+	"description": "Track coding activity in VS Code with local reports and optional SlashCoded Desktop integration.",
 	"version": "0.12.0",
 	"type": "commonjs",
 	"license": "GPL-3.0",
-	"publisher": "lundholm",
+	"publisher": "DavidLundholm",
 	"author": "David Lundholm",
 	"icon": "images/slashcoded.png",
 	"engines": {
@@ -125,7 +125,8 @@
 	},
 	"keywords": [
 		"vscode",
-		"record",
+		"activity",
+		"analytics",
 		"report",
 		"multi-root ready"
 	]

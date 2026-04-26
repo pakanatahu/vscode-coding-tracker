@@ -4,7 +4,7 @@
 
 # SlashCoded for VS Code
 
-SlashCoded is a free, advanced coding tracker for VS Code. It measures coding activity and turns it into useful local reporting data. It is designed for the [SlashCoded Desktop](https://lundholm.io/projects/slashcoded?ref=vscodeext) ecosystem, where the extension acts as an activity producer and sends events to the desktop app's local ingest service.
+SlashCoded tracks coding activity in VS Code and turns it into local reporting data. It can also integrate with [SlashCoded Desktop](https://lundholm.io/projects/slashcoded?ref=vscodeext), where the extension acts as an activity producer and sends events to the desktop app's local ingest service.
 
 The extension can also run on its own. If SlashCoded Desktop is not installed, SlashCoded stores activity locally and shows it in the built-in dashboard. There is no cloud upload path in this extension.
 
@@ -84,11 +84,12 @@ Settings are under Preferences -> Settings -> SlashCoded:
 
 ## SlashCoded Desktop
 
-1. Download the Windows installer from https://lundholm.io/projects/slashcoded?ref=vscodeext.
-2. Run the installer.
-3. Start the desktop app before launching VS Code so the extension discovers it automatically.
-4. Use `SlashCoded: Show Sync Status` if Desktop starts after VS Code.
-5. To import standalone history into Desktop, run `SlashCoded: Import Local History into Desktop`.
+SlashCoded Desktop is optional. The extension works without it by storing activity locally and serving the built-in dashboard.
+
+1. Install SlashCoded Desktop from https://lundholm.io/projects/slashcoded?ref=vscodeext.
+2. Start the desktop app before launching VS Code so the extension discovers it automatically.
+3. Use `SlashCoded: Show Sync Status` if Desktop starts after VS Code.
+4. To import standalone history into Desktop, run `SlashCoded: Import Local History into Desktop`.
 
 ## Development
 
