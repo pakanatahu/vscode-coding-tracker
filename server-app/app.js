@@ -1,4 +1,54 @@
-let reportChart24h = null;
+const areaCharts = new Map();
+const THEME_STORAGE_KEY = 'slashcoded.localDashboard.theme';
+const GROUP_LIMITS = {
+    'By activity': Infinity,
+    'By repository': 8,
+    'By repository branch': 6,
+    'By language': 8
+};
+const OTHER_LABELS = {
+    'By repository': 'Other repositories',
+    'By repository branch': 'Other repository branches',
+    'By language': 'Other languages'
+};
+
+function initTheme() {
+    const stored = readStoredTheme();
+    const preferred = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const theme = stored || preferred;
+    applyTheme(theme);
+
+    const toggle = document.querySelector('#theme-toggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', () => {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        try {
+            window.localStorage?.setItem(THEME_STORAGE_KEY, nextTheme);
+        } catch (_) {
+            // ignore blocked localStorage
+        }
+    });
+}
+
+function readStoredTheme() {
+    try {
+        const value = window.localStorage?.getItem(THEME_STORAGE_KEY);
+        return value === 'dark' || value === 'light' ? value : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function applyTheme(theme) {
+    const normalized = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', normalized);
+    const toggle = document.querySelector('#theme-toggle');
+    if (!toggle) return;
+    const isDark = normalized === 'dark';
+    toggle.setAttribute('aria-pressed', String(isDark));
+    toggle.textContent = isDark ? 'Light mode' : 'Dark mode';
+}
 
 async function loadSummary() {
     try {
@@ -6,59 +56,80 @@ async function loadSummary() {
         if (!response.ok) throw new Error(`Request failed with ${response.status}`);
         const summary = await response.json();
 
-        renderQuickStats(summary.totals || {}, document.querySelector('#quick-stats'));
-        render24HourChart(summary.chart24h || {});
+        renderQuickStats(summary || {}, document.querySelector('#quick-stats'));
+        renderAreaChart('chart24h', summary.chart24h || {}, {
+            fallbackTitle: 'Last 24 hours',
+            canvasId: 'chart24h-canvas',
+            ariaLabel: 'Last 24 hours activity chart',
+            emptyText: 'No local activity recorded for today yet.',
+            fixedMaxMinutes: 60,
+            tickStep: 15,
+            showAllXTicks: true,
+            xTickRotation: 50,
+            unit: 'minutes'
+        });
+        renderAreaChart('chartMonth', summary.chartMonth || {}, {
+            fallbackTitle: 'This month',
+            canvasId: 'chart-month-canvas',
+            ariaLabel: 'Current month activity chart',
+            emptyText: 'No local activity recorded for this month yet.',
+            tickStep: undefined,
+            showAllXTicks: true,
+            unit: 'hours'
+        });
         renderGroup('By activity', 'Time grouped by tracked activity type.', summary.byActivity || [], document.querySelector('#activity-groups'));
         renderGroup('By repository', 'Repository totals from the raw locally stored events.', summary.byRepo || [], document.querySelector('#repo-groups'));
-        renderGroup('By branch', 'Branch totals from the raw locally stored events.', summary.byBranch || [], document.querySelector('#branch-groups'));
-        renderGroup('By file extension', 'Total time spent in files grouped by extension.', summary.byExtension || [], document.querySelector('#extension-groups'));
+        renderGroup('By repository branch', 'Branch totals paired with their repository.', summary.byRepoBranch || [], document.querySelector('#branch-groups'));
+        renderGroup('By language', 'Tracked file activity grouped by language.', summary.byLanguage || [], document.querySelector('#extension-groups'));
     } catch (error) {
         renderError(error);
     }
 }
 
-function render24HourChart(chart) {
-    const root = document.querySelector('#chart24h');
+function renderAreaChart(rootId, chart, config) {
+    const root = document.querySelector(`#${rootId}`);
     if (!root) return;
     const labels = Array.isArray(chart.labels) ? chart.labels : [];
     const series = Array.isArray(chart.series) ? chart.series : [];
     const activeSeries = series.filter(item => Array.isArray(item.values));
     const hasData = activeSeries.some(item => item.values.some(value => Number(value) > 0));
+    const title = chart.title || config.fallbackTitle;
 
     if (!labels.length || !activeSeries.length || !hasData) {
-        destroy24HourChart();
+        destroyAreaChart(rootId);
         root.innerHTML = `
             <div class="chart-header">
-                <h2>Last 24 hours</h2>
+                <h2>${escapeHtml(title)}</h2>
             </div>
             <div class="chart-canvas-wrap chart-empty-wrap">
-                <p class="empty-state">No local activity recorded for today yet.</p>
+                <p class="empty-state">${escapeHtml(config.emptyText)}</p>
             </div>
-            ${renderBreakdownToolbar(chart)}
         `;
         return;
     }
 
     root.innerHTML = `
         <div class="chart-header">
-            <h2>${escapeHtml(chart.title || 'Last 24 hours')}</h2>
+            <div class="chart-title-row">
+                <h2>${escapeHtml(title)}</h2>
+                ${renderChartStats(activeSeries)}
+            </div>
+            ${renderChartLegend(activeSeries)}
         </div>
         <div class="chart-frame">
             <div class="chart-canvas-wrap">
-                <canvas id="chart24h-canvas" aria-label="Last 24 hours activity chart" role="img"></canvas>
+                <canvas id="${escapeHtml(config.canvasId)}" aria-label="${escapeHtml(config.ariaLabel)}" role="img"></canvas>
             </div>
         </div>
-        ${renderBreakdownToolbar(chart)}
     `;
 
-    render24HourChartCanvas(root, chart, labels, activeSeries);
+    renderAreaChartCanvas(rootId, root, chart, labels, activeSeries, config);
 }
 
-function renderQuickStats(totals, root) {
+function renderQuickStats(summary, root) {
     if (!root) return;
-    const rangeLabel = totals.rangeStart && totals.rangeEnd
-        ? formatRangeLabel(totals.rangeStart, totals.rangeEnd)
-        : 'No local activity recorded yet.';
+    const totals = summary.totals || {};
+    const reportDate = summary.reportDateLabel || 'Current local date';
 
     root.innerHTML = `
         <div class="panel-head quick-stats-head">
@@ -66,65 +137,86 @@ function renderQuickStats(totals, root) {
             <p class="panel-copy">Summary computed from the local fallback history store.</p>
         </div>
         <div class="quick-stats-grid">
-            ${renderQuickStat('Activity today', formatDuration(totals.totalMs || 0))}
-            ${renderQuickStat('Tracked records', String(totals.eventCount || 0))}
-            ${renderQuickStat('Recorded range', rangeLabel)}
+            ${renderQuickStat('Tracked time', formatRoundedDuration(totals.totalMs || 0))}
+            ${renderQuickStat('Events', String(totals.eventCount || 0))}
+            ${renderQuickStat('Report date', reportDate)}
         </div>
     `;
 }
 
-function renderBreakdownToolbar(chart) {
-    const label = chart.breakdownLabel || 'Break down by';
-    const options = Array.isArray(chart.breakdownOptions) && chart.breakdownOptions.length
-        ? chart.breakdownOptions
-        : ['Activities'];
-    const active = chart.activeBreakdown || options[0];
-
+function renderChartStats(series) {
+    const totalMs = series.reduce((total, item) => total + (Number(item.totalMs) || sum(item.values || [], value => value)), 0);
     return `
-        <div class="breakdown-toolbar" role="group" aria-label="${escapeHtml(label)}">
-            <span class="muted small">${escapeHtml(label)}</span>
-            ${options.map(option => `<button type="button" class="toolbar-chip${option === active ? ' active' : ''}">${escapeHtml(option)}</button>`).join('')}
+        <div class="chart-top-stats">
+            <div class="stat-inline">
+                <span class="label">Tracked time</span>
+                <span class="value">${escapeHtml(formatRoundedDuration(totalMs))}</span>
+            </div>
         </div>
     `;
 }
 
-function destroy24HourChart() {
-    if (!reportChart24h) return;
+function renderChartLegend(series) {
+    return `
+        <ul class="legend-inline" role="list" aria-label="Activity legend">
+            ${series.map(item => {
+                const color = item.color || cssHsl(item.colorVar || '--chart-1');
+                const totalMs = Number(item.totalMs) || sum(item.values || [], value => value);
+                return `
+                    <li class="legend-pill" style="--c: ${escapeHtml(color)}">
+                        <span class="swatch" aria-hidden="true"></span>
+                        <span class="lbl">${escapeHtml(item.label || 'Unknown')}</span>
+                        <span class="mins">${escapeHtml(formatRoundedDuration(totalMs))}</span>
+                    </li>
+                `;
+            }).join('')}
+        </ul>
+    `;
+}
+
+function sum(items, selector) {
+    return items.reduce((total, item) => total + (Number(selector(item)) || 0), 0);
+}
+
+function destroyAreaChart(key) {
+    const chart = areaCharts.get(key);
+    if (!chart) return;
     try {
-        reportChart24h.destroy();
+        chart.destroy();
     } catch (_) {
         // noop
     }
-    reportChart24h = null;
+    areaCharts.delete(key);
 }
 
-function render24HourChartCanvas(root, chart, labels, series) {
-    destroy24HourChart();
-    const canvas = root.querySelector('#chart24h-canvas');
+function renderAreaChartCanvas(key, root, chart, labels, series, config) {
+    destroyAreaChart(key);
+    const canvas = root.querySelector(`#${config.canvasId}`);
     if (!canvas || !window.Chart) return;
 
-    const datasets = buildAreaDatasets(canvas, series);
-    const options = createAreaChartOptions(labels, chart.currentTimeLabel || '');
+    const datasets = buildAreaDatasets(canvas, series, config);
+    const options = createAreaChartOptions(labels, chart, config);
     const plugins = [
         createVerticalLinePlugin(),
         createTopStackOutlinePlugin()
     ];
 
-    reportChart24h = new window.Chart(canvas.getContext('2d'), {
+    areaCharts.set(key, new window.Chart(canvas.getContext('2d'), {
         type: 'line',
         data: { labels, datasets },
         options,
         plugins
-    });
+    }));
 }
 
-function buildAreaDatasets(canvas, series) {
+function buildAreaDatasets(canvas, series, config) {
+    const divisor = config.unit === 'hours' ? 3600000 : 60000;
     return series.map((item, index) => {
-        const stroke = item.color || cssHsl(`--chart-${index + 1}`);
+        const stroke = item.color || cssHsl(item.colorVar || `--chart-${index + 1}`);
         const backgroundColor = buildSeriesGradient(canvas, stroke);
         return {
             label: item.label || 'Unknown',
-            data: (item.values || []).map(value => (Number(value) || 0) / 60000),
+            data: (item.values || []).map(value => (Number(value) || 0) / divisor),
             borderColor: stroke,
             backgroundColor,
             borderWidth: index === 2 ? 3 : 2.4,
@@ -151,9 +243,12 @@ function buildSeriesGradient(canvas, stroke) {
     return gradient;
 }
 
-function createAreaChartOptions(labels, currentTimeLabel) {
+function createAreaChartOptions(labels, chart, config) {
     const is24hLabels = labels.length > 0 && labels.length <= 24;
-    const maxMinutes = 60;
+    const unit = config.unit === 'hours' ? 'hours' : 'minutes';
+    const maxValue = config.fixedMaxMinutes || computeDynamicMaxValue(chart.series || [], unit);
+    const tickStep = config.tickStep || computeTickStep(maxValue, unit);
+    const xTickRotation = Number(config.xTickRotation) || 0;
     return {
         ...lineBaseOptions(),
         animation: false,
@@ -174,12 +269,12 @@ function createAreaChartOptions(labels, currentTimeLabel) {
                 callbacks: {
                     title: (items) => {
                         const item = items && items[0];
-                        return item && typeof item.label === 'string' ? item.label : currentTimeLabel;
+                        return item && typeof item.label === 'string' ? item.label : (chart.currentTimeLabel || '');
                     },
-                    label: (ctx) => `${ctx.dataset.label} ${formatDuration(Number(ctx.parsed?.y || 0) * 60000)}`,
+                    label: (ctx) => `${ctx.dataset.label} ${formatDuration(Number(ctx.parsed?.y || 0) * (unit === 'hours' ? 3600000 : 60000))}`,
                     footer: (items) => {
-                        const totalMinutes = items.reduce((sum, item) => sum + (Number(item.parsed?.y) || 0), 0);
-                        return `Total ${formatDuration(totalMinutes * 60000)}`;
+                        const total = items.reduce((sum, item) => sum + (Number(item.parsed?.y) || 0), 0);
+                        return `Total ${formatDuration(total * (unit === 'hours' ? 3600000 : 60000))}`;
                     }
                 }
             }
@@ -202,10 +297,10 @@ function createAreaChartOptions(labels, currentTimeLabel) {
                     color: readCssVar('--grid-line', 'rgba(255,255,255,0.06)')
                 },
                 ticks: {
-                    autoSkip: true,
-                    maxTicksLimit: 8,
-                    maxRotation: 0,
-                    minRotation: 0,
+                    autoSkip: !config.showAllXTicks,
+                    maxTicksLimit: config.showAllXTicks ? undefined : 8,
+                    maxRotation: xTickRotation,
+                    minRotation: xTickRotation,
                     color: cssHsl('--muted-foreground'),
                     callback: (_, index) => labels[index] || ''
                 }
@@ -214,24 +309,52 @@ function createAreaChartOptions(labels, currentTimeLabel) {
                 position: 'right',
                 stacked: true,
                 beginAtZero: true,
-                max: maxMinutes,
+                max: maxValue,
                 grid: {
                     color: readCssVar('--grid-line', 'rgba(255,255,255,0.06)'),
                     drawOnChartArea: true
                 },
                 title: {
                     display: true,
-                    text: 'Minutes',
+                    text: unit === 'hours' ? 'Hours' : 'Minutes',
                     color: cssHsl('--muted-foreground')
                 },
                 ticks: {
-                    stepSize: 15,
+                    stepSize: tickStep,
                     color: cssHsl('--muted-foreground'),
-                    callback: (value) => formatMinuteTick(Number(value))
+                    callback: (value) => unit === 'hours' ? formatHourTick(Number(value)) : formatMinuteTick(Number(value))
                 }
             }
         }
     };
+}
+
+function computeDynamicMaxValue(series, unit) {
+    const activeSeries = Array.isArray(series) ? series : [];
+    const width = activeSeries.reduce((max, item) => Math.max(max, Array.isArray(item.values) ? item.values.length : 0), 0);
+    let max = 0;
+    const divisor = unit === 'hours' ? 3600000 : 60000;
+    for (let index = 0; index < width; index += 1) {
+        const totalMs = activeSeries.reduce((sumMs, item) => sumMs + (Number(item.values?.[index]) || 0), 0);
+        max = Math.max(max, totalMs / divisor);
+    }
+    if (unit === 'hours') {
+        if (max <= 0) return 1;
+        return Math.max(1, Math.ceil(max));
+    }
+    if (max <= 0) return 60;
+    return Math.max(60, Math.ceil(max / 60) * 60);
+}
+
+function computeTickStep(maxValue, unit) {
+    if (unit === 'hours') {
+        if (maxValue <= 6) return 1;
+        if (maxValue <= 12) return 2;
+        return 4;
+    }
+    if (maxValue <= 60) return 15;
+    if (maxValue <= 240) return 60;
+    return 120;
 }
 
 function createVerticalLinePlugin() {
@@ -335,6 +458,10 @@ function formatMinuteTick(value) {
     return `${Math.max(0, Number(value) || 0)}m`;
 }
 
+function formatHourTick(value) {
+    return `${Math.max(0, Number(value) || 0)}h`;
+}
+
 function renderQuickStat(label, value) {
     return `
         <article class="stat-card">
@@ -356,6 +483,14 @@ function renderGroup(title, description, items, root) {
         `;
         return;
     }
+    const limit = GROUP_LIMITS[title] ?? Infinity;
+    const visibleItems = Number.isFinite(limit) ? items.slice(0, limit) : items;
+    const hiddenItems = Number.isFinite(limit) ? items.slice(limit) : [];
+    const hiddenTotal = hiddenItems.reduce((total, item) => total + (Number(item.totalMs) || 0), 0);
+    const displayItems = hiddenItems.length
+        ? visibleItems.concat([{ key: OTHER_LABELS[title] || 'Other', totalMs: hiddenTotal, isSummary: true }])
+        : visibleItems;
+    const maxTotal = Math.max(...displayItems.map(item => Number(item.totalMs) || 0), 1);
 
     root.innerHTML = `
         <div class="panel-head">
@@ -363,16 +498,24 @@ function renderGroup(title, description, items, root) {
             <p class="panel-copy">${escapeHtml(description)}</p>
         </div>
         <div class="group-list">
-            ${items.map(item => renderGroupRow(title, item)).join('')}
+            ${displayItems.map(item => renderGroupRow(title, item, maxTotal)).join('')}
         </div>
     `;
 }
 
-function renderGroupRow(title, item) {
+function renderGroupRow(title, item, maxTotal) {
+    const summaryClass = item.isSummary ? ' group-row-summary' : '';
+    const totalMs = Number(item.totalMs) || 0;
+    const width = Math.max(2, Math.min(100, Math.round((totalMs / Math.max(maxTotal, 1)) * 100)));
     return `
-        <div class="group-row">
-            <span class="group-key">${escapeHtml(formatGroupKey(title, item.key || 'Unknown'))}</span>
-            <span class="group-value">${escapeHtml(formatDuration(item.totalMs || 0))}</span>
+        <div class="group-row${summaryClass}">
+            <div class="group-row-head">
+                <span class="group-key">${escapeHtml(formatGroupKey(title, item.key || 'Unknown'))}</span>
+                <span class="group-value">${escapeHtml(formatBarDuration(totalMs))}</span>
+            </div>
+            <div class="group-bar-track" aria-hidden="true">
+                <span class="group-bar-fill" style="width: ${width}%"></span>
+            </div>
         </div>
     `;
 }
@@ -403,14 +546,21 @@ function formatDuration(totalMs) {
     return `${seconds}s`;
 }
 
-function formatRangeLabel(startTimestamp, endTimestamp) {
-    try {
-        const start = new Date(startTimestamp);
-        const end = new Date(endTimestamp);
-        return `${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} to ${end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
-    } catch (_) {
-        return 'Unknown';
+function formatRoundedDuration(totalMs) {
+    const ms = Math.max(0, Number(totalMs) || 0);
+    if (ms >= 3600000) return `${Math.max(1, Math.round(ms / 3600000))}h`;
+    return formatDuration(ms);
+}
+
+function formatBarDuration(totalMs) {
+    const ms = Math.max(0, Number(totalMs) || 0);
+    if (ms >= 3600000) {
+        const hours = ms / 3600000;
+        return hours >= 10 ? `${Math.round(hours)}h` : `${Math.round(hours * 10) / 10}h`;
     }
+    const minutes = Math.round(ms / 60000);
+    if (minutes >= 1) return `${minutes} min`;
+    return formatDuration(ms);
 }
 
 function formatGroupKey(title, key) {
@@ -441,4 +591,5 @@ function escapeHtml(value) {
         .replaceAll("'", '&#39;');
 }
 
+initTheme();
 void loadSummary();

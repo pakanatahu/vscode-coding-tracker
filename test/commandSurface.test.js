@@ -85,6 +85,22 @@ test('README command overview lists only the approved SlashCoded commands', () =
     assert.match(readme, /SlashCoded: Show Output Channel/);
 });
 
+test('README includes the built-in dashboard screenshot for Marketplace details', () => {
+    const readme = readText('README.md');
+    const screenshotPath = path.join(repoRoot, 'images', 'built-in-dashboard-screenshot.png');
+
+    assert.match(readme, /images\/built-in-dashboard-screenshot\.png/);
+    assert.match(readme, /Built-In Dashboard/);
+    assert.equal(fs.existsSync(screenshotPath), true);
+});
+
+test('README describes current built-in dashboard grouping labels', () => {
+    const readme = readText('README.md');
+
+    assert.match(readme, /repository branch, and language/);
+    assert.doesNotMatch(readme, /branch, and file extension/);
+});
+
 test('active runtime modules do not register removed standalone commands', () => {
     const sources = [
         readText('lib/LocalServer.js'),
@@ -278,6 +294,18 @@ test('runtime dependencies stay limited to required packaged assets', () => {
     const pkg = readJson('package.json');
 
     assert.deepEqual(Object.keys(pkg.dependencies || {}).sort(), ['chart.js']);
+});
+
+test('extension-origin Desktop links include vscode attribution ref', () => {
+    const readme = readText('README.md');
+    const localServer = readText('lib/LocalServer.js');
+    const dashboard = readText('server-app/index.html');
+    const trackedUrl = 'https://lundholm.io/projects/slashcoded?ref=vscodeext';
+
+    assert.match(readme, new RegExp(trackedUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(localServer, new RegExp(trackedUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(dashboard, new RegExp(trackedUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.equal(readJson('package.json').homepage, 'https://lundholm.io/projects/slashcoded');
 });
 
 test('output channel uses SlashCoded branding', () => {

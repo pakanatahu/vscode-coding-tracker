@@ -70,7 +70,7 @@ test('report route serves the desktop-style fallback dashboard shell', async () 
     }
 });
 
-test('report route serves the chart footer breakdown toolbar', async () => {
+test('report route serves the polished dashboard shell without inert chart toolbar', async () => {
     const staticDir = path.join(__dirname, '..', 'server-app');
     const server = start({
         staticDir,
@@ -82,8 +82,12 @@ test('report route serves the chart footer breakdown toolbar', async () => {
     try {
         await waitForServer(server);
         const html = await httpGetText(`${server.url}/report/`);
-        assert.match(html, /Break down by/);
-        assert.match(html, /toolbar-chip/);
+        assert.match(html, /theme-toggle/);
+        assert.match(html, /SLASHCODED \| VSCode Built-In Dashboard/);
+        assert.match(html, /By repository branch/);
+        assert.match(html, /By language/);
+        assert.doesNotMatch(html, /Break down by/);
+        assert.doesNotMatch(html, /toolbar-chip/);
     } finally {
         server.close();
     }

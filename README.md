@@ -2,7 +2,7 @@
 
 # SlashCoded for VS Code
 
-SlashCoded is a free, advanced coding tracker for VS Code. It measures coding activity and turns it into useful local reporting data. It is designed for the [SlashCoded Desktop](https://lundholm.io/projects/slashcoded) ecosystem, where the extension acts as an activity producer and sends events to the desktop app's local ingest service.
+SlashCoded is a free, advanced coding tracker for VS Code. It measures coding activity and turns it into useful local reporting data. It is designed for the [SlashCoded Desktop](https://lundholm.io/projects/slashcoded?ref=vscodeext) ecosystem, where the extension acts as an activity producer and sends events to the desktop app's local ingest service.
 
 The extension can also run on its own. If SlashCoded Desktop is not installed, SlashCoded stores activity locally and shows it in the built-in dashboard. There is no cloud upload path in this extension.
 
@@ -26,6 +26,16 @@ Highlights:
 - Opens a built-in local dashboard for standalone use
 - Uploads events to SlashCoded Desktop when its local API is discovered
 
+## Screenshots
+
+### Built-In Dashboard
+
+![SlashCoded VS Code built-in dashboard showing local activity charts and grouped activity breakdowns](images/built-in-dashboard-screenshot.png)
+
+### SlashCoded Desktop
+
+![SlashCoded Desktop activity breakdown showing reading, writing, and terminal activity over time](images\slashcoded-desktop-overview.png)
+
 ## Features
 
 - Status bar with exclusive mode and upload queue insights
@@ -33,7 +43,7 @@ Highlights:
 - AFK detection with automatic pause/resume
 - Terminal activity tracking with command execution timelines
 - AI chat tracking across providers with context-key heuristics and focus-aware detection
-- Built-in fallback summary dashboard grouped by activity, repository, branch, and file extension
+- Built-in fallback summary dashboard grouped by activity, repository, repository branch, and language
 - Desktop discovery, standalone local storage, and upload timeout controls
 
 ## Useful Commands
@@ -72,10 +82,11 @@ Settings are under Preferences -> Settings -> SlashCoded:
 
 ## SlashCoded Desktop
 
-1. Download the Windows installer from https://lundholm.io/projects/slashcoded.
-2. Run the installer, sign in or create an account, and let the app install the local ingest service.
+1. Download the Windows installer from https://lundholm.io/projects/slashcoded?ref=vscodeext.
+2. Run the installer.
 3. Start the desktop app before launching VS Code so the extension discovers it automatically.
 4. Use `SlashCoded: Show Sync Status` if Desktop starts after VS Code.
+5. To import standalone history into Desktop, run `SlashCoded: Import Local History into Desktop`.
 
 ## Development
 

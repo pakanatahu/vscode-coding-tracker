@@ -11,6 +11,7 @@ logs/**
 scripts/**
 test/**
 tests/**
+testdata/**
 utils/**
 __tests__/**
 
@@ -22,7 +23,7 @@ node_modules/chart.js/dist/**
 !node_modules/chart.js/dist/chart.umd.js
 !node_modules/chart.js/LICENSE.md
 
-images/advanced-multiterminal-activity-20260420.png
+images/127.0.0.1_10345_report_ (1).png
 images/icon_*.png
 images/screenshots/**
 

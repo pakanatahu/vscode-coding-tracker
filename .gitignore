@@ -6,13 +6,17 @@
 # ignore *.vsix (extension archive file)
 *.vsix
 
+dist
 .playwright-mcp
 .multiterminal
-.agents
-.vscode
+.agents/*
+.vscode/*
 
 dist
-
+testdata
+scripts/*test*.mjs
+.multiterminal
+docs/superpowers
 #
 .vscode/settings.json
 # ignore generated i18n files

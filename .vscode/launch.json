@@ -11,6 +11,17 @@
             "stopOnEntry": false
         },
         {
+            "name": "Launch Extension (Screenshot Data)",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}" ],
+            "env": {
+                "SLASHCODED_LOCAL_REPORT_NOW": "2026-01-31T23:00:00"
+            },
+            "stopOnEntry": false
+        },
+        {
             "name": "Launch Tests",
             "type": "extensionHost",
             "request": "launch",

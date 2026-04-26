@@ -546,17 +546,251 @@ var require_historyStore = __commonJS({
   }
 });
 
+// lib/localReport/languageExtensions.js
+var require_languageExtensions = __commonJS({
+  "lib/localReport/languageExtensions.js"(exports2, module2) {
+    var path = require("path");
+    var LANGUAGE_BY_EXTENSION = Object.freeze({
+      ".astro": "Astro",
+      ".bat": "Batch",
+      ".blade.php": "Blade",
+      ".c": "C",
+      ".cc": "C++",
+      ".clj": "Clojure",
+      ".cljs": "ClojureScript",
+      ".cmake": "CMake",
+      ".coffee": "CoffeeScript",
+      ".cpp": "C++",
+      ".cs": "C#",
+      ".cshtml": "Razor",
+      ".csproj": "C# Project",
+      ".css": "CSS",
+      ".csv": "CSV",
+      ".cxx": "C++",
+      ".dart": "Dart",
+      ".dockerfile": "Docker",
+      ".ejs": "EJS",
+      ".elm": "Elm",
+      ".erl": "Erlang",
+      ".ex": "Elixir",
+      ".exs": "Elixir",
+      ".fs": "F#",
+      ".fsi": "F#",
+      ".fsx": "F#",
+      ".go": "Go",
+      ".graphql": "GraphQL",
+      ".groovy": "Groovy",
+      ".h": "C/C++ Header",
+      ".handlebars": "Handlebars",
+      ".hbs": "Handlebars",
+      ".hpp": "C++ Header",
+      ".hrl": "Erlang",
+      ".html": "HTML",
+      ".ini": "INI",
+      ".java": "Java",
+      ".jl": "Julia",
+      ".js": "JavaScript",
+      ".json": "JSON",
+      ".jsonc": "JSONC",
+      ".jsx": "JavaScript React",
+      ".kt": "Kotlin",
+      ".kts": "Kotlin",
+      ".less": "Less",
+      ".lua": "Lua",
+      ".m": "Objective-C",
+      ".md": "Markdown",
+      ".mdx": "MDX",
+      ".mm": "Objective-C++",
+      ".php": "PHP",
+      ".pl": "Perl",
+      ".prisma": "Prisma",
+      ".ps1": "PowerShell",
+      ".psd1": "PowerShell",
+      ".psm1": "PowerShell",
+      ".py": "Python",
+      ".r": "R",
+      ".razor": "Razor",
+      ".rb": "Ruby",
+      ".rs": "Rust",
+      ".sass": "Sass",
+      ".scala": "Scala",
+      ".scss": "SCSS",
+      ".sh": "Shell",
+      ".sln": "Visual Studio Solution",
+      ".sql": "SQL",
+      ".svelte": "Svelte",
+      ".swift": "Swift",
+      ".tf": "Terraform",
+      ".tfvars": "Terraform",
+      ".toml": "TOML",
+      ".ts": "TypeScript",
+      ".tsx": "TypeScript React",
+      ".twig": "Twig",
+      ".vb": "Visual Basic",
+      ".vue": "Vue",
+      ".xml": "XML",
+      ".yaml": "YAML",
+      ".yml": "YAML",
+      ".zig": "Zig"
+    });
+    var LANGUAGE_BY_FILENAME = Object.freeze({
+      ".env": "Environment",
+      "cmakelists.txt": "CMake",
+      "dockerfile": "Docker",
+      "jenkinsfile": "Jenkins",
+      "makefile": "Makefile"
+    });
+    var LANGUAGE_NAME_ALIASES = Object.freeze({
+      astro: "Astro",
+      bat: "Batch",
+      batch: "Batch",
+      c: "C",
+      clojure: "Clojure",
+      cmake: "CMake",
+      coffee: "CoffeeScript",
+      coffeescript: "CoffeeScript",
+      cpp: "C++",
+      csharp: "C#",
+      "c#": "C#",
+      css: "CSS",
+      csv: "CSV",
+      dart: "Dart",
+      docker: "Docker",
+      dockerfile: "Docker",
+      elixir: "Elixir",
+      elm: "Elm",
+      erl: "Erlang",
+      erlang: "Erlang",
+      fsharp: "F#",
+      "f#": "F#",
+      go: "Go",
+      graphql: "GraphQL",
+      groovy: "Groovy",
+      handlebars: "Handlebars",
+      html: "HTML",
+      ini: "INI",
+      java: "Java",
+      javascript: "JavaScript",
+      javascriptreact: "JavaScript React",
+      js: "JavaScript",
+      json: "JSON",
+      jsonc: "JSONC",
+      jsx: "JavaScript React",
+      julia: "Julia",
+      kotlin: "Kotlin",
+      less: "Less",
+      lua: "Lua",
+      makefile: "Makefile",
+      markdown: "Markdown",
+      mdx: "MDX",
+      objectivec: "Objective-C",
+      objectivecpp: "Objective-C++",
+      perl: "Perl",
+      php: "PHP",
+      plaintext: "",
+      powershell: "PowerShell",
+      prisma: "Prisma",
+      python: "Python",
+      r: "R",
+      razor: "Razor",
+      ruby: "Ruby",
+      rust: "Rust",
+      sass: "Sass",
+      scala: "Scala",
+      scss: "SCSS",
+      shellscript: "Shell",
+      sql: "SQL",
+      svelte: "Svelte",
+      swift: "Swift",
+      terraform: "Terraform",
+      toml: "TOML",
+      ts: "TypeScript",
+      tsx: "TypeScript React",
+      twig: "Twig",
+      typescript: "TypeScript",
+      typescriptreact: "TypeScript React",
+      vb: "Visual Basic",
+      vue: "Vue",
+      xml: "XML",
+      yaml: "YAML",
+      yml: "YAML",
+      zig: "Zig"
+    });
+    var EXCLUDED_FILENAMES = /* @__PURE__ */ new Set([
+      "package-lock.json",
+      "npm-shrinkwrap.json",
+      "yarn.lock",
+      "pnpm-lock.yaml",
+      "composer.lock",
+      "gemfile.lock",
+      "cargo.lock",
+      "poetry.lock",
+      "pipfile.lock"
+    ]);
+    var EXCLUDED_EXTENSIONS = /* @__PURE__ */ new Set([
+      ".chat",
+      ".lock",
+      ".log",
+      ".map"
+    ]);
+    function normalizeLanguageName(value) {
+      const text = typeof value === "string" ? value.trim() : "";
+      if (!text) return "";
+      const normalized = text.toLowerCase().replace(/[\s_-]+/g, "");
+      if (Object.prototype.hasOwnProperty.call(LANGUAGE_NAME_ALIASES, normalized)) {
+        return LANGUAGE_NAME_ALIASES[normalized];
+      }
+      return text;
+    }
+    function languageFromFile(file) {
+      const text = typeof file === "string" ? file.trim() : "";
+      if (!text) return "";
+      const basename = path.basename(text).toLowerCase();
+      if (!basename || EXCLUDED_FILENAMES.has(basename)) return "";
+      if (LANGUAGE_BY_FILENAME[basename]) return LANGUAGE_BY_FILENAME[basename];
+      const multiPartExtension = findMultiPartExtension(basename);
+      if (multiPartExtension) return LANGUAGE_BY_EXTENSION[multiPartExtension];
+      const ext = path.extname(basename).toLowerCase();
+      if (!ext || EXCLUDED_EXTENSIONS.has(ext)) return "";
+      return LANGUAGE_BY_EXTENSION[ext] || "";
+    }
+    function findMultiPartExtension(basename) {
+      const matches = Object.keys(LANGUAGE_BY_EXTENSION).filter((ext) => ext.includes(".", 1) && basename.endsWith(ext)).sort((left, right) => right.length - left.length);
+      return matches[0] || "";
+    }
+    module2.exports = {
+      LANGUAGE_BY_EXTENSION,
+      LANGUAGE_NAME_ALIASES,
+      languageFromFile,
+      normalizeLanguageName
+    };
+  }
+});
+
 // lib/localReport/reportAggregator.js
 var require_reportAggregator = __commonJS({
   "lib/localReport/reportAggregator.js"(exports2, module2) {
     var path = require("path");
-    function buildReportSummary(events) {
+    var { languageFromFile, normalizeLanguageName } = require_languageExtensions();
+    var HOUR_MS = 60 * 60 * 1e3;
+    var DAY_MS = 24 * HOUR_MS;
+    var ACTIVITY_SERIES = [
+      { key: "reading", label: "Reading", aliases: ["open"], colorVar: "--chart-2", color: "#38bdf8" },
+      { key: "coding", label: "Coding", aliases: ["code"], colorVar: "--chart-1", color: "#8b5cf6" },
+      { key: "aiChat", label: "AI chat", aliases: ["chat", "aiChat", "aichat"], colorVar: "--chart-3", color: "#2dd4bf" },
+      { key: "terminal", label: "Terminal", aliases: ["terminal"], colorVar: "--chart-4", color: "#f59e0b" }
+    ];
+    function buildReportSummary(events, options) {
+      const now = normalizeNow(options && options.now);
       const safeEvents = Array.isArray(events) ? events.filter(Boolean) : [];
       const filteredEvents = safeEvents.filter((event) => Number(event.long) > 0);
       const datedEvents = filteredEvents.filter((event) => Number(event.time) > 0);
       const times = datedEvents.map((event) => Number(event.time));
-      const chart24h = build24HourChart(filteredEvents);
+      const chart24h = build24HourChart(filteredEvents, now);
+      const chartMonth = buildMonthChart(filteredEvents, now);
       return {
+        reportDate: now.getTime(),
+        reportDateLabel: formatReportDate(now),
         totals: {
           totalMs: sum(filteredEvents, (event) => Number(event.long) || 0),
           eventCount: filteredEvents.length,
@@ -564,49 +798,26 @@ var require_reportAggregator = __commonJS({
           rangeEnd: times.length ? Math.max(...times.map((time, index) => time + (Number(datedEvents[index].long) || 0))) : null
         },
         chart24h,
+        chartMonth,
         byActivity: toGroups(filteredEvents, (event) => normalizeActivity(event.type)),
         byRepo: toGroups(filteredEvents, (event) => normalizeRepo(event.vcs_repo)),
         byBranch: toGroups(filteredEvents, (event) => normalizeBranch(event.vcs_branch)),
+        byRepoBranch: toGroups(filteredEvents, normalizeRepoBranch),
         byExtension: toGroups(
           filteredEvents.filter((event) => shouldIncludeExtension(event.file)),
           (event) => extractExtension(event.file)
+        ),
+        byLanguage: toGroups(
+          filteredEvents.filter((event) => normalizeLanguage(event)),
+          normalizeLanguage
         )
       };
     }
-    function build24HourChart(events) {
-      const now = /* @__PURE__ */ new Date();
+    function build24HourChart(events, now) {
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-      const endOfDay = startOfDay + 24 * 60 * 60 * 1e3;
-      const hourMs = 60 * 60 * 1e3;
+      const endOfDay = startOfDay + DAY_MS;
       const labels = Array.from({ length: 24 }, (_, hour) => `${String(hour).padStart(2, "0")}:00`);
-      const reading = new Array(24).fill(0);
-      const writing = new Array(24).fill(0);
-      const terminal = new Array(24).fill(0);
-      for (const event of events) {
-        const bucket = toChartBucket(event.type);
-        if (!bucket) continue;
-        const eventStart = Number(event.time) || 0;
-        const duration = Number(event.long) || 0;
-        if (eventStart <= 0 || duration <= 0) continue;
-        const eventEnd = eventStart + duration;
-        const overlapStart = Math.max(eventStart, startOfDay);
-        const overlapEnd = Math.min(eventEnd, endOfDay);
-        if (overlapEnd <= overlapStart) continue;
-        for (let hour = 0; hour < 24; hour += 1) {
-          const slotStart = startOfDay + hour * hourMs;
-          const slotEnd = slotStart + hourMs;
-          const coveredMs = Math.max(0, Math.min(overlapEnd, slotEnd) - Math.max(overlapStart, slotStart));
-          if (!coveredMs) continue;
-          if (bucket === "reading") reading[hour] += coveredMs;
-          if (bucket === "writing") writing[hour] += coveredMs;
-          if (bucket === "terminal") terminal[hour] += coveredMs;
-        }
-      }
-      const peakHours = Math.max(
-        ...reading.map((_, index) => (reading[index] + writing[index] + terminal[index]) / hourMs),
-        0
-      );
-      const maxHours = peakHours > 0 ? Math.max(0.25, Math.ceil(peakHours * 4) / 4) : 1;
+      const buckets = buildActivityBuckets(events, startOfDay, 24, HOUR_MS);
       return {
         title: "Last 24 hours",
         breakdownLabel: "Break down by",
@@ -615,18 +826,75 @@ var require_reportAggregator = __commonJS({
         axisUnit: "Minutes",
         labels,
         currentTimeLabel: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
-        maxHours,
-        series: [
-          { key: "reading", label: "Reading", totalMs: sum(reading, (value) => value), values: reading, color: "#50c2ff" },
-          { key: "writing", label: "Writing", totalMs: sum(writing, (value) => value), values: writing, color: "#7a5cff" },
-          { key: "terminal", label: "Terminal", totalMs: sum(terminal, (value) => value), values: terminal, color: "#c46cff" }
-        ]
+        rangeStart: startOfDay,
+        rangeEnd: endOfDay,
+        maxHours: 1,
+        series: buildChartSeries(buckets)
       };
     }
+    function buildMonthChart(events, now) {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const endOfMonth = startOfMonth + daysInMonth * DAY_MS;
+      const labels = Array.from({ length: daysInMonth }, (_, index) => String(index + 1).padStart(2, "0"));
+      const buckets = buildActivityBuckets(events, startOfMonth, daysInMonth, DAY_MS);
+      const peakHours = Math.max(
+        ...labels.map((_, index) => ACTIVITY_SERIES.reduce((total, activity) => total + buckets[activity.key][index], 0) / HOUR_MS),
+        0
+      );
+      return {
+        title: now.toLocaleDateString(void 0, { month: "long", year: "numeric" }),
+        breakdownLabel: "Break down by",
+        breakdownOptions: ["Activities"],
+        activeBreakdown: "Activities",
+        axisUnit: "Minutes",
+        labels,
+        rangeStart: startOfMonth,
+        rangeEnd: endOfMonth,
+        maxHours: peakHours > 0 ? Math.max(1, Math.ceil(peakHours)) : 1,
+        series: buildChartSeries(buckets)
+      };
+    }
+    function buildActivityBuckets(events, rangeStart, bucketCount, bucketMs) {
+      const buckets = Object.fromEntries(ACTIVITY_SERIES.map((activity) => [activity.key, new Array(bucketCount).fill(0)]));
+      const rangeEnd = rangeStart + bucketCount * bucketMs;
+      for (const event of events) {
+        const bucket = toChartBucket(event.type);
+        if (!bucket) continue;
+        const eventStart = Number(event.time) || 0;
+        const duration = Number(event.long) || 0;
+        if (eventStart <= 0 || duration <= 0) continue;
+        const eventEnd = eventStart + duration;
+        const overlapStart = Math.max(eventStart, rangeStart);
+        const overlapEnd = Math.min(eventEnd, rangeEnd);
+        if (overlapEnd <= overlapStart) continue;
+        const firstIndex = Math.max(0, Math.floor((overlapStart - rangeStart) / bucketMs));
+        const lastIndex = Math.min(bucketCount - 1, Math.floor((overlapEnd - 1 - rangeStart) / bucketMs));
+        for (let index = firstIndex; index <= lastIndex; index += 1) {
+          const slotStart = rangeStart + index * bucketMs;
+          const slotEnd = slotStart + bucketMs;
+          const coveredMs = Math.max(0, Math.min(overlapEnd, slotEnd) - Math.max(overlapStart, slotStart));
+          if (coveredMs) buckets[bucket][index] += coveredMs;
+        }
+      }
+      return buckets;
+    }
+    function buildChartSeries(buckets) {
+      return ACTIVITY_SERIES.map((activity) => ({
+        key: activity.key,
+        label: activity.label,
+        totalMs: sum(buckets[activity.key], (value) => value),
+        values: buckets[activity.key],
+        color: activity.color,
+        colorVar: activity.colorVar
+      }));
+    }
     function toChartBucket(type) {
-      if (type === "open") return "reading";
-      if (type === "code") return "writing";
-      if (type === "terminal") return "terminal";
+      const value = typeof type === "string" ? type.trim() : "";
+      const lower = value.toLowerCase();
+      for (const activity of ACTIVITY_SERIES) {
+        if (activity.aliases.some((alias) => alias.toLowerCase() === lower)) return activity.key;
+      }
       return "";
     }
     function sum(items, selector) {
@@ -645,13 +913,23 @@ var require_reportAggregator = __commonJS({
       });
     }
     function normalizeActivity(value) {
-      return normalizeLabel(value, "unknown");
+      const bucket = toChartBucket(value);
+      const activity = ACTIVITY_SERIES.find((item) => item.key === bucket);
+      return activity ? activity.label : "Unknown";
     }
     function normalizeRepo(value) {
       return normalizeLabel(value, "No repository");
     }
     function normalizeBranch(value) {
       return normalizeLabel(value, "No branch");
+    }
+    function normalizeRepoBranch(event) {
+      return `${normalizeRepo(event.vcs_repo)} / ${normalizeBranch(event.vcs_branch)}`;
+    }
+    function normalizeLanguage(event) {
+      const lang = typeof event.lang === "string" ? event.lang.trim() : "";
+      const normalizedLanguage = normalizeLanguageName(lang);
+      return normalizedLanguage || languageFromFile(event.file);
     }
     function normalizeLabel(value, fallback) {
       const text = typeof value === "string" ? value.trim() : "";
@@ -663,6 +941,17 @@ var require_reportAggregator = __commonJS({
     function extractExtension(file) {
       const ext = path.extname(typeof file === "string" ? file.trim() : "");
       return ext || "No extension";
+    }
+    function normalizeNow(value) {
+      if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+      if (typeof value === "string" || typeof value === "number") {
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) return parsed;
+      }
+      return /* @__PURE__ */ new Date();
+    }
+    function formatReportDate(now) {
+      return now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
     }
     module2.exports = {
       buildReportSummary
@@ -823,6 +1112,7 @@ var require_LocalServer = __commonJS({
   "lib/LocalServer.js"(exports2, module2) {
     var DEFAULT_PORT = 10345;
     var SILENT_START_SERVER = true;
+    var SLASHCODED_DESKTOP_DOWNLOAD_URL = "https://lundholm.io/projects/slashcoded?ref=vscodeext";
     var URL2 = require("url");
     var fs = require("fs");
     var vscode = require("vscode");
@@ -908,10 +1198,10 @@ var require_LocalServer = __commonJS({
           getReportSummary: async () => {
             const historyStore = createHistoryStore({ storagePath });
             const events = await historyStore.readReportEvents();
-            return Object.assign(buildReportSummary(events), {
+            return Object.assign(buildReportSummary(events, { now: process.env.SLASHCODED_LOCAL_REPORT_NOW }), {
               desktop: {
                 detected: false,
-                downloadUrl: "https://lundholm.io/project/slashcoded"
+                downloadUrl: SLASHCODED_DESKTOP_DOWNLOAD_URL
               }
             });
           }
