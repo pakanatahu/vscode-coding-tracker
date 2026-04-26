@@ -9,6 +9,7 @@
 - Removed the generated VSIX from Git tracking; future VSIX packages are local build artifacts and remain ignored by `.gitignore`.
 - Fixed the Marketplace publisher ID to `DavidLundholm` so the extension can be published under the correct publisher account.
 - Tightened Marketplace-facing metadata and README wording to describe Desktop integration without promotional download language.
+- Added Marketplace search terms for "coding tracker" so SlashCoded can be discovered from VS Code extension search.
 
 ## 0.11.0
 

@@ -286,7 +286,10 @@ test('marketplace metadata uses the public SlashCoded identity', () => {
     assert.equal(pkg.displayName, 'SlashCoded');
     assert.equal(pkg.publisher, 'DavidLundholm');
     assert.equal(pkg.icon, 'images/slashcoded.png');
-    assert.match(pkg.description, /^Track coding activity in VS Code/);
+    assert.match(pkg.description, /^Coding tracker for VS Code/);
+    assert.ok(pkg.keywords.includes('coding tracker'));
+    assert.ok(pkg.keywords.includes('coding activity tracker'));
+    assert.ok(pkg.keywords.includes('slashcoded'));
     assert.doesNotMatch(pkg.description, /fork|cloud|upload token|computer id/i);
 });
 
