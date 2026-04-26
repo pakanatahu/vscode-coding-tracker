@@ -1,4 +1,4 @@
-![](images\slashcoded.png)
+![](images/slashcoded.png)
 
 # SlashCoded for VS Code
 
@@ -34,7 +34,7 @@ Highlights:
 
 ### SlashCoded Desktop
 
-![SlashCoded Desktop activity breakdown showing reading, writing, and terminal activity over time](images\slashcoded-desktop-overview.png)
+![SlashCoded Desktop activity breakdown showing reading, writing, and terminal activity over time](images/slashcoded-desktop-overview.png)
 
 ## Features
 
