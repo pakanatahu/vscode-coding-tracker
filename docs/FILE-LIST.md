@@ -100,7 +100,7 @@ This file is a high-level inventory of the repository. It is meant to help contr
 - `.vscode/launch.json`: Extension Development Host launch profiles.
 - `dist/extension.js`: Generated bundle from `npm run bundle` / `npm run package`.
 - `dist/package.contributes.json`: Generated package contribution metadata.
-- `SlashCoded-VSCode-Extension.0.11.0.vsix`: Generated local VSIX package.
+- `SlashCoded-VSCode-Extension.x.x.x.vsix`: Generated local VSIX package.
 
 ## Superpowers Specs And Plans
 

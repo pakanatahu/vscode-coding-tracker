@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.12.0 (2026/04/26)
+
+- First public release of SlashCoded for VS Code on the Visual Studio Marketplace.
+- Added Marketplace-ready README screenshots for the built-in dashboard and SlashCoded Desktop.
+- Updated README image paths and logo sizing so GitHub and Marketplace previews render correctly.
+- Added contributor documentation and a focused contributor issue list for localization and Secondary Side Bar AI chat tracking improvements.
+- Removed the generated VSIX from Git tracking; future VSIX packages are local build artifacts and remain ignored by `.gitignore`.
+
 ## 0.11.0
 
 - Renamed the public settings and command IDs from `codingTracker.*` to `slashCoded.*` for the first public release.
