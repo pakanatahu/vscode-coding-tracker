@@ -3,6 +3,7 @@
 ## 0.12.1 (2026/04/26)
 
 - Improved Marketplace SEO metadata so SlashCoded is easier to discover from VS Code extension search for "coding tracker" and related terms.
+- Added a GitHub Actions release pipeline that lints, tests, packages, publishes with `vsce`, uploads the VSIX artifact, and creates tag-based GitHub releases from the changelog.
 
 ## 0.12.0 (2026/04/26)
 

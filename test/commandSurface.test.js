@@ -270,6 +270,22 @@ test('package script writes the SlashCoded VSIX filename', async () => {
     assert.doesNotMatch(packageScript, /shell: process\.platform === 'win32'/);
 });
 
+test('GitHub release workflow tests, packages, and publishes VSIX releases', () => {
+    const workflow = readText('.github/workflows/publish-extension.yml');
+
+    assert.match(workflow, /tags:\s*\n\s+- "v\*"/);
+    assert.match(workflow, /workflow_dispatch:/);
+    assert.match(workflow, /npm ci/);
+    assert.match(workflow, /npm run lint/);
+    assert.match(workflow, /npm run test:node/);
+    assert.match(workflow, /npm run package/);
+    assert.match(workflow, /verify-pat DavidLundholm --pat "\$\{VSCE_PAT\}"/);
+    assert.match(workflow, /publish --packagePath "\$\{\{ steps\.vsix\.outputs\.path \}\}" --pat "\$\{VSCE_PAT\}"/);
+    assert.match(workflow, /body_path: release-notes\.md/);
+    assert.match(workflow, /actions\/upload-artifact@v4/);
+    assert.match(workflow, /softprops\/action-gh-release@v2/);
+});
+
 test('package files carry the first public settings surface version', () => {
     const pkg = readJson('package.json');
     const lock = readJson('package-lock.json');

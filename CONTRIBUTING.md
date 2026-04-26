@@ -72,6 +72,14 @@ npm run package
 
 Check generated files deliberately. `npm run bundle` and `npm run package` update `dist/extension.js`, and packaging creates a VSIX in the repository root.
 
+## Release Pipeline
+
+The `Release VS Code Extension` GitHub Actions workflow runs on `v*` tags and manual dispatches. It installs dependencies, runs lint and tests, checks package version consistency, packages the VSIX, uploads the VSIX artifact, and creates a GitHub release from the matching `CHANGELOG.md` section.
+
+Tag releases publish to the Visual Studio Marketplace with `vsce`. Configure the repository secret `VSCE_PAT` with a Marketplace token for publisher `DavidLundholm`, then create a tag that matches `package.json`, for example `v0.12.1`.
+
+Manual workflow runs package and upload the VSIX without publishing unless the `publish` input is enabled.
+
 ## Dashboard Work
 
 The built-in dashboard lives in `server-app/` and receives data from the local report route in `lib/LocalServer.js`.

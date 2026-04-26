@@ -1,16 +1,26 @@
-name: Publish VS Code Extension
+name: Release VS Code Extension
 
 on:
   push:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish the packaged VSIX to the Visual Studio Marketplace"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     env:
       NODE_VERSION: "22"
@@ -27,16 +37,44 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify tag matches package.json version
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test:node
+
+      - name: Verify release metadata
         shell: bash
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
           PKG_VERSION="$(node -p "require('./package.json').version")"
-          if [[ "${TAG}" != "v${PKG_VERSION}" ]]; then
-            echo "Tag ${TAG} does not match package.json version v${PKG_VERSION}"
+          LOCK_VERSION="$(node -p "require('./package-lock.json').version")"
+          LOCK_ROOT_VERSION="$(node -p "require('./package-lock.json').packages[''].version")"
+
+          if [[ "${PKG_VERSION}" != "${LOCK_VERSION}" || "${PKG_VERSION}" != "${LOCK_ROOT_VERSION}" ]]; then
+            echo "package.json and package-lock.json versions do not match"
             exit 1
           fi
+
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            if [[ "${TAG}" != "v${PKG_VERSION}" ]]; then
+              echo "Tag ${TAG} does not match package.json version v${PKG_VERSION}"
+              exit 1
+            fi
+          fi
+
+      - name: Verify Marketplace token
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.publish)
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        shell: bash
+        run: |
+          if [[ -z "${VSCE_PAT}" ]]; then
+            echo "Missing required repository secret: VSCE_PAT"
+            exit 1
+          fi
+
+          npx @vscode/vsce verify-pat DavidLundholm --pat "${VSCE_PAT}"
 
       - name: Build and package VSIX
         run: npm run package
@@ -49,10 +87,37 @@ jobs:
           echo "path=${VSIX_PATH}" >> "${GITHUB_OUTPUT}"
           echo "VSIX_PATH=${VSIX_PATH}" >> "${GITHUB_ENV}"
 
+      - name: Extract release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const pkg = require('./package.json');
+          const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+          const heading = `## ${pkg.version}`;
+          const start = changelog.indexOf(heading);
+
+          if (start === -1) {
+            throw new Error(`Could not find changelog section for ${pkg.version}`);
+          }
+
+          const next = changelog.indexOf('\n## ', start + heading.length);
+          const section = changelog
+            .slice(start, next === -1 ? undefined : next)
+            .split(/\r?\n/)
+            .slice(1)
+            .join('\n')
+            .trim();
+
+          fs.writeFileSync('release-notes.md', section ? `${section}\n` : `Release ${pkg.version}\n`);
+          NODE
+
       - name: Publish to Visual Studio Marketplace
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.publish)
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: npx @vscode/vsce publish --packagePath "${{ steps.vsix.outputs.path }}" -p "${VSCE_PAT}"
+        run: npx @vscode/vsce publish --packagePath "${{ steps.vsix.outputs.path }}" --pat "${VSCE_PAT}"
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
@@ -65,4 +130,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          body_path: release-notes.md
           files: ${{ steps.vsix.outputs.path }}
