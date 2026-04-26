@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.12.1 (2026/04/26)
+
+- Improved Marketplace SEO metadata so SlashCoded is easier to discover from VS Code extension search for "coding tracker" and related terms.
+
 ## 0.12.0 (2026/04/26)
 
 - First public release of SlashCoded for VS Code on the Visual Studio Marketplace.
@@ -9,7 +13,6 @@
 - Removed the generated VSIX from Git tracking; future VSIX packages are local build artifacts and remain ignored by `.gitignore`.
 - Fixed the Marketplace publisher ID to `DavidLundholm` so the extension can be published under the correct publisher account.
 - Tightened Marketplace-facing metadata and README wording to describe Desktop integration without promotional download language.
-- Added Marketplace search terms for "coding tracker" so SlashCoded can be discovered from VS Code extension search.
 
 ## 0.11.0
 

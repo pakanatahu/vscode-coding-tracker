@@ -2,7 +2,7 @@
 	"name": "slashcoded-vscode-extension",
 	"displayName": "SlashCoded",
 	"description": "Coding tracker for VS Code that tracks coding activity with local reports and optional SlashCoded Desktop integration.",
-	"version": "0.12.0",
+	"version": "0.12.1",
 	"type": "commonjs",
 	"license": "GPL-3.0",
 	"publisher": "DavidLundholm",
