@@ -1,4 +1,6 @@
-![](images/slashcoded.png)
+<p align="center">
+  <img src="images/slashcoded.png" alt="SlashCoded logo" width="96">
+</p>
 
 # SlashCoded for VS Code
 
