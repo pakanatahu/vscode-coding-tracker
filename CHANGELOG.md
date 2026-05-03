@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.12.2 (2026/05/03)
+
+- Added a documented SlashCoded event timezone contract for VS Code upload payloads.
+- Included producer timezone metadata in Desktop event payloads so uploads identify the originating timezone.
+- Bumped the extension package metadata to `0.12.2` for Marketplace publishing.
+
 ## 0.12.1 (2026/04/26)
 
 - Improved Marketplace SEO metadata so SlashCoded is easier to discover from VS Code extension search for "coding tracker" and related terms.
