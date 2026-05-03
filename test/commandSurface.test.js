@@ -286,13 +286,13 @@ test('GitHub release workflow tests, packages, and publishes VSIX releases', () 
     assert.match(workflow, /softprops\/action-gh-release@v2/);
 });
 
-test('package files carry the first public settings surface version', () => {
-    const pkg = readJson('package.json');
-    const lock = readJson('package-lock.json');
+test('package files carry the current extension release version', () => {
+	const pkg = readJson('package.json');
+	const lock = readJson('package-lock.json');
 
-    assert.equal(pkg.version, '0.12.1');
-    assert.equal(lock.version, '0.12.1');
-    assert.equal(lock.packages[''].version, '0.12.1');
+	assert.equal(pkg.version, '0.12.2');
+	assert.equal(lock.version, '0.12.2');
+	assert.equal(lock.packages[''].version, '0.12.2');
 });
 
 test('marketplace metadata uses the public SlashCoded identity', () => {
