@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { mapToDesktopEvent } = require('../lib/core/desktopEventMapper');
+const { mapToDesktopEvent, getProducerTimezoneMetadata } = require('../lib/core/desktopEventMapper');
 
 test('mapToDesktopEvent stamps timing metadata into payload and occurredAt at segment end', () => {
     const event = mapToDesktopEvent({
@@ -23,6 +23,8 @@ test('mapToDesktopEvent stamps timing metadata into payload and occurredAt at se
     assert.equal(event.durationMs, 15000);
     assert.equal(event.durationMinutes, 1);
     assert.equal(event.occurredAt, '2026-04-14T09:15:30.000Z');
+    assert.equal(event.timezoneSource, 'producer');
+    assert.equal(typeof event.timezoneOffsetMinutes, 'number');
     assert.equal(event.payload.segment_start_ts, Date.UTC(2026, 3, 14, 9, 15, 15));
     assert.equal(event.payload.segment_end_ts, Date.UTC(2026, 3, 14, 9, 15, 30));
     assert.equal(event.payload.trackerConfigVersion, '2026-04-14T00:00:00.0000000Z');
@@ -47,4 +49,11 @@ test('mapToDesktopEvent ignores pcid and omits it from desktop payload', () => {
 
     assert.equal(event.project, 'vscode-local');
     assert.equal(Object.prototype.hasOwnProperty.call(event.payload, 'pcid'), false);
+});
+
+test('getProducerTimezoneMetadata returns contract source', () => {
+    const metadata = getProducerTimezoneMetadata(Date.UTC(2026, 4, 3, 9, 0, 0));
+
+    assert.equal(metadata.timezoneSource, 'producer');
+    assert.equal(typeof metadata.timezoneOffsetMinutes, 'number');
 });
